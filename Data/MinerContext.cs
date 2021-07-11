@@ -36,16 +36,8 @@ namespace CryptoStashStats.Data
                 .HasIndex(el => el.Address)
                 .IsUnique();
 
-            builder.Entity<Wallet>()
-                .HasIndex(el => el.CoinId)
-                .IsUnique();
-
             builder.Entity<Worker>()
                 .HasIndex(el => el.Name)
-                .IsUnique();
-
-            builder.Entity<Worker>()
-                .HasIndex(el => el.WalletId)
                 .IsUnique();
 
             builder.Entity<PoolBalance>()

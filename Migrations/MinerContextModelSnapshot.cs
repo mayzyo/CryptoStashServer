@@ -212,8 +212,7 @@ namespace CryptoStashStats.Migrations
                     b.HasIndex("Address")
                         .IsUnique();
 
-                    b.HasIndex("CoinId")
-                        .IsUnique();
+                    b.HasIndex("CoinId");
 
                     b.ToTable("Wallet");
                 });
@@ -248,8 +247,7 @@ namespace CryptoStashStats.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("WalletId")
-                        .IsUnique();
+                    b.HasIndex("WalletId");
 
                     b.ToTable("Worker");
                 });

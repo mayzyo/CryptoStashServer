@@ -29,8 +29,15 @@ namespace CryptoStashStats
         public void ConfigureServices(IServiceCollection services)
         {
             // Entity Core setup
-            var builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("MinerDB"));
-            if (Configuration["MinerDB"] != null) builder.Password = Configuration["MinerDB"];
+            NpgsqlConnectionStringBuilder builder;
+            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_MinerDb") != null)
+            {
+                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_MinerDb"));
+            } else
+            {
+                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("MinerDB"));
+                if (Configuration["MinerDB"] != null) builder.Password = Configuration["MinerDB"];
+            }
 
             services.AddDbContext<MinerContext>(options => options.UseNpgsql(builder.ConnectionString));
 
@@ -53,11 +60,12 @@ namespace CryptoStashStats
                 //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CryptoStashStats v1"));
             }
 
+            var origins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "*";
             // CORS setting with CorsPolicyBuilder.
             app.UseCors(builder =>
             {
                 builder
-                .WithOrigins("*")
+                .WithOrigins(origins)
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });

@@ -10,7 +10,6 @@ namespace CryptoStashStats.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int WalletId { get; set; }
         public Wallet Wallet { get; set; }
         public MiningPool? MiningPool { get; set; }
     }

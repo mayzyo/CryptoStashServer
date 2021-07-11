@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CryptoStashStats.Migrations
 {
     [DbContext(typeof(MinerContext))]
-    [Migration("20210707042201_CurrentToDouble")]
-    partial class CurrentToDouble
+    [Migration("20210710022111_RemoveUniqueConstraints")]
+    partial class RemoveUniqueConstraints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,8 +62,14 @@ namespace CryptoStashStats.Migrations
                     b.Property<int>("Average")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<int>("Current")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Reported")
                         .HasColumnType("integer");
@@ -85,6 +91,12 @@ namespace CryptoStashStats.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -97,6 +109,54 @@ namespace CryptoStashStats.Migrations
                     b.ToTable("MiningPool");
                 });
 
+            modelBuilder.Entity("CryptoStashStats.Models.Payout", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("ConfirmAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Confirmed")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("MiningPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TXHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TXHash")
+                        .IsUnique();
+
+                    b.HasIndex("WalletId");
+
+                    b.HasIndex("MiningPoolId", "WalletId")
+                        .IsUnique();
+
+                    b.ToTable("Payout");
+                });
+
             modelBuilder.Entity("CryptoStashStats.Models.PoolBalance", b =>
                 {
                     b.Property<int>("Id")
@@ -104,8 +164,14 @@ namespace CryptoStashStats.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<double>("Current")
                         .HasColumnType("double precision");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("MiningPoolId")
                         .HasColumnType("integer");
@@ -148,8 +214,7 @@ namespace CryptoStashStats.Migrations
                     b.HasIndex("Address")
                         .IsUnique();
 
-                    b.HasIndex("CoinId")
-                        .IsUnique();
+                    b.HasIndex("CoinId");
 
                     b.ToTable("Wallet");
                 });
@@ -184,8 +249,7 @@ namespace CryptoStashStats.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("WalletId")
-                        .IsUnique();
+                    b.HasIndex("WalletId");
 
                     b.ToTable("Worker");
                 });
@@ -199,10 +263,29 @@ namespace CryptoStashStats.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("CryptoStashStats.Models.PoolBalance", b =>
+            modelBuilder.Entity("CryptoStashStats.Models.Payout", b =>
                 {
                     b.HasOne("CryptoStashStats.Models.MiningPool", "MiningPool")
                         .WithMany()
+                        .HasForeignKey("MiningPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CryptoStashStats.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MiningPool");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.PoolBalance", b =>
+                {
+                    b.HasOne("CryptoStashStats.Models.MiningPool", "MiningPool")
+                        .WithMany("PoolBalances")
                         .HasForeignKey("MiningPoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -242,6 +325,11 @@ namespace CryptoStashStats.Migrations
                     b.Navigation("MiningPool");
 
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.MiningPool", b =>
+                {
+                    b.Navigation("PoolBalances");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.Wallet", b =>
