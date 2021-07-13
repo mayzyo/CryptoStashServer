@@ -39,15 +39,19 @@ namespace CryptoStashStats
                 if (Configuration["MinerDB"] != null) builder.Password = Configuration["MinerDB"];
             }
 
+            services.AddDbContext<UserContext>(options => options.UseNpgsql(builder.ConnectionString));
             services.AddDbContext<MinerContext>(options => options.UseNpgsql(builder.ConnectionString));
+            services.AddDbContext<FinanceContext>(options => options.UseNpgsql(builder.ConnectionString));
 
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CryptoStashStats", Version = "v3" });
             });
+            services.AddSwaggerGenNewtonsoftSupport();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

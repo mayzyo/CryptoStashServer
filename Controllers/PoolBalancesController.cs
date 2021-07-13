@@ -34,7 +34,6 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<PoolBalance>> GetPoolBalance(int id)
         {
             var poolBalance = await context.PoolBalance
-                .Include(e => e.Wallet)
                 .Include(e => e.MiningPool)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -46,8 +45,46 @@ namespace CryptoStashStats.Controllers
             return poolBalance;
         }
 
-        // PUT: /PoolBalances/5
+        // PUT: /PoolBalances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public async Task<IActionResult> PutPoolBalance(string address, string poolName, PoolBalance poolBalance)
+        {
+            if (poolName != poolBalance.MiningPool.Name || address != poolBalance.Address)
+            {
+                return BadRequest();
+            }
+
+            PoolBalance existing;
+
+            try
+            {
+                existing = await context.PoolBalance
+                    .Include(e => e.MiningPool)
+                    .FirstAsync(e => e.MiningPool.Name == poolName && e.Address == address);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+
+            // TODO: Improve implementation.
+            existing.Current = poolBalance.Current;
+
+            context.Entry(existing).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return NoContent();
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPoolBalance(int id, PoolBalance poolBalance)
         {
@@ -77,44 +114,43 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        [HttpPut("{poolName}/{walletAddress}")]
-        public async Task<IActionResult> PutPoolBalance(string poolName, string walletAddress, PoolBalance poolBalance)
-        {
-            if (poolName != poolBalance.MiningPool.Name || walletAddress != poolBalance.Wallet.Address)
-            {
-                return BadRequest();
-            }
+        //[HttpPut("{poolName}/{address}")]
+        //public async Task<IActionResult> PutPoolBalance(string poolName, string address, PoolBalance poolBalance)
+        //{
+        //    if (poolName != poolBalance.MiningPool.Name || address != poolBalance.Address)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            PoolBalance existing;
+        //    PoolBalance existing;
 
-            try
-            {
-                existing = await context.PoolBalance
-                    .Include(e => e.MiningPool)
-                    .Include(e => e.Wallet)
-                    .FirstAsync(e => e.MiningPool.Name == poolName && e.Wallet.Address == walletAddress);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+        //    try
+        //    {
+        //        existing = await context.PoolBalance
+        //            .Include(e => e.MiningPool)
+        //            .FirstAsync(e => e.MiningPool.Name == poolName && e.Address == address);
+        //    }
+        //    catch (InvalidOperationException)
+        //    {
+        //        return NotFound();
+        //    }
 
-            // TODO: Improve implementation.
-            existing.Current = poolBalance.Current;
+        //    // TODO: Improve implementation.
+        //    existing.Current = poolBalance.Current;
 
-            context.Entry(existing).State = EntityState.Modified;
+        //    context.Entry(existing).State = EntityState.Modified;
 
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
+        //    try
+        //    {
+        //        await context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        throw;
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: /PoolBalances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -127,14 +163,6 @@ namespace CryptoStashStats.Controllers
             if (miningPool != null)
             {
                 poolBalance.MiningPool = miningPool;
-            }
-
-            var wallet = await context.Wallet
-                .FirstOrDefaultAsync(e => e.Address == poolBalance.Wallet.Address);
-
-            if (wallet != null)
-            {
-                poolBalance.Wallet = wallet;
             }
 
             context.PoolBalance.Add(poolBalance);
@@ -162,14 +190,6 @@ namespace CryptoStashStats.Controllers
         private bool PoolBalanceExists(int id)
         {
             return context.PoolBalance.Any(e => e.Id == id);
-        }
-
-        private bool PoolBalanceExists(string poolName, string walletAddress)
-        {
-            return context.PoolBalance
-                .Include(e => e.MiningPool)
-                .Include(e => e.Wallet)
-                .Any(e => e.MiningPool.Name == poolName && e.Wallet.Address == walletAddress);
         }
     }
 }

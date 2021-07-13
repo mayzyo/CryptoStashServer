@@ -10,7 +10,6 @@ namespace CryptoStashStats.Data
 {
     public class MinerContext : BaseContext
     {
-        public DbSet<Wallet> Wallet { get; set; }
         public DbSet<Worker> Worker { get; set; }
         public DbSet<Hashrate> Hashrate { get; set; }
         public DbSet<PoolBalance> PoolBalance { get; set; }
@@ -19,41 +18,25 @@ namespace CryptoStashStats.Data
 
         public MinerContext(DbContextOptions<MinerContext> options) : base(options)
         {
-
+  
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.Entity<Coin>()
-                .HasIndex(el => el.Ticker)
-                .IsUnique();
-
-            builder.Entity<Coin>()
-                .HasIndex(el => el.Name)
-                .IsUnique();
-
-            builder.Entity<Wallet>()
-                .HasIndex(el => el.Address)
-                .IsUnique();
-
+        {            
             builder.Entity<Worker>()
-                .HasIndex(el => el.Name)
+                .HasIndex(e => e.Name)
                 .IsUnique();
 
             builder.Entity<PoolBalance>()
-                .HasIndex(el => new { el.MiningPoolId, el.WalletId })
+                .HasIndex(e => new { e.MiningPoolId, e.Address })
                 .IsUnique();
 
             builder.Entity<MiningPool>()
-                .HasIndex(el => el.Name)
+                .HasIndex(e => e.Name)
                 .IsUnique();
 
             builder.Entity<Payout>()
-                .HasIndex(el => el.TXHash)
-                .IsUnique();
-
-            builder.Entity<Payout>()
-                .HasIndex(el => new { el.MiningPoolId, el.WalletId })
+                .HasIndex(e => e.TXHash)
                 .IsUnique();
         }
     }

@@ -15,9 +15,9 @@ namespace CryptoStashStats.Controllers
     [ApiController]
     public class WalletsController : ControllerBase
     {
-        private readonly MinerContext context;
+        private readonly FinanceContext context;
 
-        public WalletsController(MinerContext context)
+        public WalletsController(FinanceContext context)
         {
             this.context = context;
         }
@@ -34,7 +34,6 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
             var wallet = await context.Wallet
-                .Include(el => el.Workers)
                 .Include(el => el.Coin)
                 .FirstOrDefaultAsync(el => el.Id == id);
 
@@ -48,6 +47,44 @@ namespace CryptoStashStats.Controllers
 
         // PUT: /Wallets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public async Task<IActionResult> PutWallet(string address, Wallet wallet)
+        {
+            if (address != wallet.Address)
+            {
+                return BadRequest();
+            }
+
+            Wallet existing;
+
+            try
+            {
+                existing = await context.Wallet
+                    .Include(e => e.Coin)
+                    .FirstAsync(e => e.Address == address);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+
+            // TODO: Improve implementation.
+            existing.Balance = wallet.Balance;
+
+            context.Entry(existing).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return NoContent();
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWallet(int id, Wallet wallet)
         {
@@ -82,6 +119,17 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<Wallet>> PostWallet(Wallet wallet)
         {
+            if(wallet.Coin != null)
+            {
+                var coin = await context.Coin
+                    .FirstOrDefaultAsync(e => e.Ticker == wallet.Coin.Ticker);
+
+                if (coin != null)
+                {
+                    wallet.Coin = coin;
+                }
+            }
+
             context.Wallet.Add(wallet);
             await context.SaveChangesAsync();
 

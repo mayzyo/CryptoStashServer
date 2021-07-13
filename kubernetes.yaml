@@ -126,10 +126,10 @@ spec:
         app: stats-server
     spec:
       imagePullSecrets:
-        - name: registry.cn-hongkong.aliyuncs.com
+        - name: registry.cn-shenzhen.aliyuncs.com
       containers:
         - name: stats-server
-          image: registry.cn-hongkong.aliyuncs.com/destinesiastudio/crypto-stash-stats:dev
+          image: registry.cn-shenzhen.aliyuncs.com/destinesiastudio/crypto-stash-stats:dev
           env:
             - name: PGSQLCONNSTR_MinerDb
               valueFrom:

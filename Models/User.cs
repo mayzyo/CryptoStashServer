@@ -9,7 +9,6 @@ namespace CryptoStashStats.Models
     public class User : BaseEntity
     {
         public int Id { get; set; }
-        public ICollection<Wallet> Wallets { get; set; }
-        public ICollection<Worker>? Workers { get; set; }
+        public string Username { get; set; }
     }
 }

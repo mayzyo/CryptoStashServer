@@ -2,28 +2,12 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace CryptoStashStats.Migrations
+namespace CryptoStashStats.Migrations.Miner
 {
-    public partial class CreateMinerDb : Migration
+    public partial class AddMinerTbls : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Coin",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Ticker = table.Column<string>(type: "text", nullable: false),
-                    Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Coin", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "MiningPool",
                 columns: table => new
@@ -40,35 +24,13 @@ namespace CryptoStashStats.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wallet",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Address = table.Column<string>(type: "text", nullable: false),
-                    CoinId = table.Column<int>(type: "integer", nullable: true),
-                    Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wallet", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Wallet_Coin_CoinId",
-                        column: x => x.CoinId,
-                        principalTable: "Coin",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Payout",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MiningPoolId = table.Column<int>(type: "integer", nullable: false),
-                    WalletId = table.Column<int>(type: "integer", nullable: false),
+                    MiningPoolId = table.Column<int>(type: "integer", nullable: true),
+                    Address = table.Column<string>(type: "text", nullable: true),
                     TXHash = table.Column<string>(type: "text", nullable: false),
                     Amount = table.Column<double>(type: "double precision", nullable: false),
                     Confirmed = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -85,13 +47,7 @@ namespace CryptoStashStats.Migrations
                         column: x => x.MiningPoolId,
                         principalTable: "MiningPool",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Payout_Wallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "Wallet",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,7 +58,7 @@ namespace CryptoStashStats.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Current = table.Column<double>(type: "double precision", nullable: false),
                     MiningPoolId = table.Column<int>(type: "integer", nullable: false),
-                    WalletId = table.Column<int>(type: "integer", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
                     Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
@@ -115,12 +71,6 @@ namespace CryptoStashStats.Migrations
                         principalTable: "MiningPool",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PoolBalance_Wallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "Wallet",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,7 +80,7 @@ namespace CryptoStashStats.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    WalletId = table.Column<int>(type: "integer", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
                     MiningPoolId = table.Column<int>(type: "integer", nullable: true),
                     Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
@@ -144,12 +94,6 @@ namespace CryptoStashStats.Migrations
                         principalTable: "MiningPool",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Worker_Wallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "Wallet",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -177,18 +121,6 @@ namespace CryptoStashStats.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Coin_Name",
-                table: "Coin",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Coin_Ticker",
-                table: "Coin",
-                column: "Ticker",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Hashrate_WorkerId",
                 table: "Hashrate",
                 column: "WorkerId");
@@ -200,10 +132,9 @@ namespace CryptoStashStats.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payout_MiningPoolId_WalletId",
+                name: "IX_Payout_MiningPoolId",
                 table: "Payout",
-                columns: new[] { "MiningPoolId", "WalletId" },
-                unique: true);
+                column: "MiningPoolId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payout_TXHash",
@@ -212,31 +143,9 @@ namespace CryptoStashStats.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payout_WalletId",
-                table: "Payout",
-                column: "WalletId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PoolBalance_MiningPoolId_WalletId",
+                name: "IX_PoolBalance_MiningPoolId_Address",
                 table: "PoolBalance",
-                columns: new[] { "MiningPoolId", "WalletId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PoolBalance_WalletId",
-                table: "PoolBalance",
-                column: "WalletId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Wallet_Address",
-                table: "Wallet",
-                column: "Address",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Wallet_CoinId",
-                table: "Wallet",
-                column: "CoinId",
+                columns: new[] { "MiningPoolId", "Address" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -248,12 +157,6 @@ namespace CryptoStashStats.Migrations
                 name: "IX_Worker_Name",
                 table: "Worker",
                 column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Worker_WalletId",
-                table: "Worker",
-                column: "WalletId",
                 unique: true);
         }
 
@@ -273,12 +176,6 @@ namespace CryptoStashStats.Migrations
 
             migrationBuilder.DropTable(
                 name: "MiningPool");
-
-            migrationBuilder.DropTable(
-                name: "Wallet");
-
-            migrationBuilder.DropTable(
-                name: "Coin");
         }
     }
 }

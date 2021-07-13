@@ -10,9 +10,9 @@ namespace CryptoStashStats.Models
     public class Wallet : BaseEntity
     {
         public int Id { get; set; }
-        public string Address { get; set; }
-        public int? CoinId { get; set; }
+        public int? UserId { get; set; }
         public Coin? Coin { get; set; }
-        public ICollection<Worker>? Workers { get; set; }
+        public string Address { get; set; }
+        public double Balance { get; set; }
     }
 }

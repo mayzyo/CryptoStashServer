@@ -89,15 +89,6 @@ namespace CryptoStashStats.Controllers
                 hashrate.Worker = worker;
             } else
             {
-                // Attach existing wallet to ew worker.
-                var wallet = await context.Wallet
-                    .FirstOrDefaultAsync(e => e.Address == hashrate.Worker.Wallet.Address);
-
-                if(wallet != null)
-                {
-                    hashrate.Worker.Wallet = wallet;
-                }
-
                 // Attach existing mining pool to new worker.
                 if(hashrate.Worker.MiningPool != null)
                 {

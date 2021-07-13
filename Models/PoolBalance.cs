@@ -12,7 +12,6 @@ namespace CryptoStashStats.Models
         public double Current { get; set; }
         public int MiningPoolId { get; set; }
         public MiningPool MiningPool { get; set; }
-        public int WalletId { get; set; }
-        public Wallet Wallet { get; set; }
+        public string Address { get; set; }
     }
 }

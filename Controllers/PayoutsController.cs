@@ -34,7 +34,6 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Payout>> GetPayout(int id)
         {
             var payout = await context.Payout
-                .Include(e => e.Wallet)
                 .Include(e => e.MiningPool)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -94,14 +93,6 @@ namespace CryptoStashStats.Controllers
             if (miningPool != null)
             {
                 payout.MiningPool = miningPool;
-            }
-
-            var wallet = await context.Wallet
-                .FirstOrDefaultAsync(e => e.Address == payout.Wallet.Address);
-
-            if (wallet != null)
-            {
-                payout.Wallet = wallet;
             }
 
             context.Payout.Add(payout);

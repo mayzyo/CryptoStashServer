@@ -34,7 +34,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Worker>> GetWorker(int id)
         {
             var worker = await context.Worker
-                .Include(el => el.Wallet)
+                .Include(el => el.MiningPool)
                 .FirstOrDefaultAsync(el => el.Id == id);
 
             if (worker == default(Worker))
