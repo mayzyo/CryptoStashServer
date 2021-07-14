@@ -51,11 +51,11 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: minerdb
+  name: crypto-staging-db
   namespace: crypto-stash
 type: kubernetes.io/basic-auth
 stringData:
-  password: t0p-Secret
+  password: Server=125.91.172.1;port=30020;user id=statsuser;password=t0p-Secret;database=crypto_staging_db;pooling=true
 
 ---
 
@@ -131,8 +131,8 @@ spec:
         - name: stats-server
           image: registry.cn-shenzhen.aliyuncs.com/destinesiastudio/crypto-stash-stats:dev
           env:
-            - name: PGSQLCONNSTR_MinerDb
+            - name: PGSQLCONNSTR_CryptoDb
               valueFrom:
                 secretKeyRef:
-                  name: minerdb
+                  name: crypto-staging-db
                   key: password

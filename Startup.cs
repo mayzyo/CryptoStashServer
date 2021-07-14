@@ -30,13 +30,13 @@ namespace CryptoStashStats
         {
             // Entity Core setup
             NpgsqlConnectionStringBuilder builder;
-            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_MinerDb") != null)
+            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_CryptoDb") != null)
             {
-                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_MinerDb"));
+                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_CryptoDb"));
             } else
             {
-                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("MinerDB"));
-                if (Configuration["MinerDB"] != null) builder.Password = Configuration["MinerDB"];
+                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("CryptoDb"));
+                if (Configuration["CryptoDb"] != null) builder.Password = Configuration["CryptoDb"];
             }
 
             services.AddDbContext<UserContext>(options => options.UseNpgsql(builder.ConnectionString));
