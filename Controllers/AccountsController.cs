@@ -13,49 +13,49 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class MiningPoolsController : ControllerBase
+    public class AccountsController : ControllerBase
     {
-        private readonly MinerContext context;
+        private readonly FinanceContext context;
 
-        public MiningPoolsController(MinerContext context)
+        public AccountsController(FinanceContext context)
         {
             this.context = context;
         }
 
-        // GET: /MiningPools
+        // GET: /Accounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MiningPool>>> GetMiningPools()
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
-            return await context.MiningPool.ToListAsync();
+            return await context.Account.ToListAsync();
         }
 
-        // GET /MiningPools/5
+        // GET /Accounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MiningPool>> GetMiningPool(int id)
+        public async Task<ActionResult<Account>> GetAccount(int id)
         {
-            var miningPool = await context.MiningPool
-                .Include(e => e.PoolBalances)
+            var account = await context.Account
+                .Include(e => e.AccountBalances)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
-            if (miningPool == default(MiningPool))
+            if (account == default(Account))
             {
                 return NotFound();
             }
 
-            return miningPool;
+            return account;
         }
 
-        // PUT: /MiningPools/5
+        // PUT: /Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMiningPool(int id, MiningPool miningPool)
+        public async Task<IActionResult> PutAccount(int id, Account account)
         {
-            if (id != miningPool.Id)
+            if (id != account.Id)
             {
                 return BadRequest();
             }
 
-            context.Entry(miningPool).State = EntityState.Modified;
+            context.Entry(account).State = EntityState.Modified;
 
             try
             {
@@ -63,7 +63,7 @@ namespace CryptoStashStats.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MiningPoolExists(id))
+                if (!AccountExists(id))
                 {
                     return NotFound();
                 }
@@ -76,36 +76,36 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // POST: /MiningPools
+        // POST: /Accounts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<MiningPool>> PostMiningPool(MiningPool miningPool)
+        public async Task<ActionResult<Account>> PostAccount(Account account)
         {
-            context.MiningPool.Add(miningPool);
+            context.Account.Add(account);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMiningPool", new { id = miningPool.Id }, miningPool);
+            return CreatedAtAction("GetAccount", new { id = account.Id }, account);
         }
 
-        // DELETE: /MiningPools/5
+        // DELETE: /Accounts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMiningPool(int id)
+        public async Task<IActionResult> DeleteAccount(int id)
         {
-            var miningPool = await context.MiningPool.FindAsync(id);
-            if (miningPool == null)
+            var account = await context.Account.FindAsync(id);
+            if (account == null)
             {
                 return NotFound();
             }
 
-            context.MiningPool.Remove(miningPool);
+            context.Account.Remove(account);
             await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool MiningPoolExists(int id)
+        private bool AccountExists(int id)
         {
-            return context.MiningPool.Any(e => e.Id == id);
+            return context.Account.Any(e => e.Id == id);
         }
     }
 }

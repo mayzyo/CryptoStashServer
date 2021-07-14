@@ -12,6 +12,7 @@ namespace CryptoStashStats.Data
     {
         public DbSet<Coin> Coin { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
+        public DbSet<Provider> Provider { get; set; }
         public DbSet<Account> Account { get; set; }
         public DbSet<AccountBalance> AccountBalance { get; set; }
 

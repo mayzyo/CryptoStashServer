@@ -13,49 +13,48 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class MiningPoolsController : ControllerBase
+    public class CoinsController : ControllerBase
     {
-        private readonly MinerContext context;
+        private readonly FinanceContext context;
 
-        public MiningPoolsController(MinerContext context)
+        public CoinsController(FinanceContext context)
         {
             this.context = context;
         }
 
-        // GET: /MiningPools
+        // GET: /Coins
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MiningPool>>> GetMiningPools()
+        public async Task<ActionResult<IEnumerable<Coin>>> GetCoins()
         {
-            return await context.MiningPool.ToListAsync();
+            return await context.Coin.ToListAsync();
         }
 
-        // GET /MiningPools/5
+        // GET /Coins/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MiningPool>> GetMiningPool(int id)
+        public async Task<ActionResult<Coin>> GetCoin(int id)
         {
-            var miningPool = await context.MiningPool
-                .Include(e => e.PoolBalances)
+            var coin = await context.Coin
                 .FirstOrDefaultAsync(e => e.Id == id);
 
-            if (miningPool == default(MiningPool))
+            if (coin == default(Coin))
             {
                 return NotFound();
             }
 
-            return miningPool;
+            return coin;
         }
 
-        // PUT: /MiningPools/5
+        // PUT: /Coins/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMiningPool(int id, MiningPool miningPool)
+        public async Task<IActionResult> PutCoin(int id, Coin coin)
         {
-            if (id != miningPool.Id)
+            if (id != coin.Id)
             {
                 return BadRequest();
             }
 
-            context.Entry(miningPool).State = EntityState.Modified;
+            context.Entry(coin).State = EntityState.Modified;
 
             try
             {
@@ -63,7 +62,7 @@ namespace CryptoStashStats.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MiningPoolExists(id))
+                if (!CoinExists(id))
                 {
                     return NotFound();
                 }
@@ -76,36 +75,36 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // POST: /MiningPools
+        // POST: /Coins
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<MiningPool>> PostMiningPool(MiningPool miningPool)
+        public async Task<ActionResult<Coin>> PostCoin(Coin coin)
         {
-            context.MiningPool.Add(miningPool);
+            context.Coin.Add(coin);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMiningPool", new { id = miningPool.Id }, miningPool);
+            return CreatedAtAction("GetCoin", new { id = coin.Id }, coin);
         }
 
-        // DELETE: /MiningPools/5
+        // DELETE: /Coins/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMiningPool(int id)
+        public async Task<IActionResult> DeleteCoin(int id)
         {
-            var miningPool = await context.MiningPool.FindAsync(id);
-            if (miningPool == null)
+            var coin = await context.Coin.FindAsync(id);
+            if (coin == null)
             {
                 return NotFound();
             }
 
-            context.MiningPool.Remove(miningPool);
+            context.Coin.Remove(coin);
             await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool MiningPoolExists(int id)
+        private bool CoinExists(int id)
         {
-            return context.MiningPool.Any(e => e.Id == id);
+            return context.Coin.Any(e => e.Id == id);
         }
     }
 }
