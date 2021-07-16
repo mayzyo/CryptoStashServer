@@ -55,7 +55,7 @@ metadata:
   namespace: crypto-stash
 type: kubernetes.io/basic-auth
 stringData:
-  password: Server=125.91.172.1;port=30020;user id=statsuser;password=t0p-Secret;database=crypto_staging_db;pooling=true
+  password: Server=125.91.172.1;port=30020;user id=statsuser;password=t0p-Secret;database=crypto_staging_db;pooling=true;Timeout=30
 
 ---
 
