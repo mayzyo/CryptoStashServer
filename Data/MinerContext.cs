@@ -24,7 +24,7 @@ namespace CryptoStashStats.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {            
             builder.Entity<Worker>()
-                .HasIndex(e => e.Name)
+                .HasIndex(e => new { e.Name, e.Address })
                 .IsUnique();
 
             builder.Entity<PoolBalance>()
@@ -41,3 +41,8 @@ namespace CryptoStashStats.Data
         }
     }
 }
+
+/*
+ * Clear context tables command:
+ * TRUNCATE TABLE "Hashrate" CASCADE;TRUNCATE TABLE "MiningPool" CASCADE;TRUNCATE TABLE "Payout" CASCADE;TRUNCATE TABLE "PoolBalance" CASCADE;TRUNCATE TABLE "Worker" CASCADE;
+ */

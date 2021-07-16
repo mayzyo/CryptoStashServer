@@ -35,6 +35,7 @@ namespace CryptoStashStats.Controllers
         {
             var miningPool = await context.MiningPool
                 .Include(e => e.PoolBalances)
+                .Include(e => e.Workers)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (miningPool == default(MiningPool))

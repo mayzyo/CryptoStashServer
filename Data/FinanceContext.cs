@@ -45,3 +45,7 @@ namespace CryptoStashStats.Data
         }
     }
 }
+/*
+ * Clear context tables command:
+ * TRUNCATE TABLE "Coin" CASCADE;TRUNCATE TABLE "Wallet" CASCADE;TRUNCATE TABLE "Provider" CASCADE;TRUNCATE TABLE "Account" CASCADE;TRUNCATE TABLE "AccountBalance" CASCADE;
+ */

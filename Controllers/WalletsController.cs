@@ -26,7 +26,9 @@ namespace CryptoStashStats.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets()
         {
-            return await context.Wallet.ToListAsync();
+            return await context.Wallet
+                .Include(el => el.Coin)
+                .ToListAsync();
         }
 
         // GET /Wallets/5
@@ -45,7 +47,7 @@ namespace CryptoStashStats.Controllers
             return wallet;
         }
 
-        // PUT: /Wallets/5
+        // PUT: /Wallets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
         public async Task<IActionResult> PutWallet(string address, Wallet wallet)

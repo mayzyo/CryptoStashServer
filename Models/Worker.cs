@@ -12,5 +12,6 @@ namespace CryptoStashStats.Models
         public string Name { get; set; }
         public string Address { get; set; }
         public MiningPool? MiningPool { get; set; }
+        public ICollection<Hashrate>? Hashrates { get; set; }
     }
 }

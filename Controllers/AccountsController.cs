@@ -26,7 +26,9 @@ namespace CryptoStashStats.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
-            return await context.Account.ToListAsync();
+            return await context.Account
+                .Include(e => e.Provider)
+                .ToListAsync();
         }
 
         // GET /Accounts/5
@@ -34,6 +36,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Account>> GetAccount(int id)
         {
             var account = await context.Account
+                .Include(e => e.Provider)
                 .Include(e => e.AccountBalances)
                 .FirstOrDefaultAsync(e => e.Id == id);
 

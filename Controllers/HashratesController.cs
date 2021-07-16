@@ -82,7 +82,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Hashrate>> PostHashrate(Hashrate hashrate)
         {
             var worker = await context.Worker
-                .FirstOrDefaultAsync(e => e.Name == hashrate.Worker.Name);
+                .FirstOrDefaultAsync(e => e.Name == hashrate.Worker.Name && e.Address == hashrate.Worker.Address);
 
             if (worker != null)
             {
