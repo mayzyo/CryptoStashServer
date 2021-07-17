@@ -11,5 +11,6 @@ namespace CryptoStashStats.Models
         public int Id { get; set; }
         public string? Name { get; set; }
         public string Ticker { get; set; }
+        public double? USD { get; set; }
     }
 }
