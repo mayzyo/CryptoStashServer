@@ -24,9 +24,13 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Hashrates
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates()
+        public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates(int page = 1, int size = 10)
         {
-            return await context.Hashrate.ToListAsync();
+            return await context.Hashrate
+                .OrderByDescending(e => e.Created)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
         }
 
         // GET /Hashrates/5

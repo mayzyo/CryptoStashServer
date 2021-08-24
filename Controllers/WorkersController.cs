@@ -46,6 +46,18 @@ namespace CryptoStashStats.Controllers
             return worker;
         }
 
+        // GET /Workers/5/Hashrates
+        [HttpGet("{id}/Hashrates")]
+        public async Task<ActionResult<IEnumerable<Hashrate>>> GetWorkerHashrates(int id, int page = 1, int size = 10)
+        {
+            return await context.Hashrate
+                .Where(e => e.Worker.Id == id)
+                .OrderByDescending(e => e.Created)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
+        }
+
         // PUT: /Workers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

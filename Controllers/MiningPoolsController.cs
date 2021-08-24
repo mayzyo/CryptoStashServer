@@ -46,6 +46,85 @@ namespace CryptoStashStats.Controllers
             return miningPool;
         }
 
+        // GET: /MiningPools/5/Workers
+        [HttpGet("{id}/Workers")]
+        public async Task<ActionResult<IEnumerable<Worker>>> GetMiningPoolWorkers(int id)
+        {
+            return await context.Worker
+                .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
+                .ToListAsync();
+        }
+
+        // GET: /MiningPools/5/Hashrates
+        //[HttpGet("{id}/Hashrates")]
+        //public async Task<IEnumerable<Hashrate>> GetMiningPoolHashrates(int id, int page = 1, int size = 3)
+        //{
+        //    var test = new Hashrate
+        //    {
+        //        Average = 0,
+        //        Current = 0,
+        //        Reported = 0
+        //    };
+
+        //    //Task.Run(context.Worker
+        //    //    .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
+        //    //    .Include(e => e.Hashrates)
+        //    //    .Select(e => e.Hashrates)
+        //    //    .ToListAsync());
+        //    var t = await context.Worker
+        //        .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
+        //        .Include(e => e.Hashrates)
+        //        .Select(e => e.Hashrates)
+        //        .ToListAsync();
+        //        //.Aggregate((a, c) => c
+        //        ////a.Zip(c, (i, t) => new Hashrate
+        //        ////    {
+        //        ////        Average = i.Average + t.Average,
+        //        ////        Current = i.Current + t.Current,
+        //        ////        Reported = i.Reported + t.Reported,
+        //        ////        Created = t.Created,
+        //        ////    }
+        //        ////)
+        //        //);
+        //    //var workers = await context.Worker
+        //    //    .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
+        //    //    .ToListAsync();
+
+        //    //var workerHashrates = new Dictionary<Worker, IList<Hashrate>>();
+        //    //IEnumerable<Hashrate> prev = new List<Hashrate>();
+
+        //    //int count = 0;
+        //    //foreach (var worker in workers)
+        //    //{
+        //    //    if(count++ > 1)
+        //    //    {
+        //    //        prev = context.Hashrate
+        //    //            .Where(e => e.Worker.Id == worker.Id)
+        //    //            .OrderByDescending(e => e.Created)
+        //    //            .Skip((page - 1) * size)
+        //    //            .Take(size)
+        //    //            .ToList()
+        //    //            .Zip(prev, (i, t) => new Hashrate
+        //    //            {
+        //    //                Average = i.Average + t.Average,
+        //    //                Current = i.Current + t.Current,
+        //    //                Reported = i.Reported + t.Reported,
+        //    //                Created = i.Created
+        //    //            });
+        //    //    } else
+        //    //    {
+        //    //        prev = context.Hashrate
+        //    //            .Where(e => e.Worker.Id == worker.Id)
+        //    //            .OrderByDescending(e => e.Created)
+        //    //            .Skip((page - 1) * size)
+        //    //            .Take(size)
+        //    //            .ToList();
+        //    //    }
+        //    //}
+
+        //    //return prev;
+        //}
+
         // PUT: /MiningPools/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
