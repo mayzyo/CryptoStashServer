@@ -81,15 +81,19 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<Payout>> PostPayout(Payout payout)
         {
+            // Check if payout already exist based on TXHash instead of Id.
+            // TODO: This doesn't seem necessary. Post actions usually result in failure if element already exists.
             if(PayoutExists(payout.TXHash))
             {
                 return await context.Payout
                     .FirstOrDefaultAsync(e => e.TXHash == payout.TXHash);
             }
 
+            // Get existing child objects from database.
             var miningPool = await context.MiningPool
                 .FirstOrDefaultAsync(e => e.Name == payout.MiningPool.Name);
 
+            // Attach exisiting child objects to the new element.
             if (miningPool != null)
             {
                 payout.MiningPool = miningPool;

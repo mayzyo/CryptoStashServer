@@ -32,6 +32,21 @@ namespace CryptoStashStats.Controllers
                 .Take(size)
                 .ToListAsync();
         }
+        // TODO: Improved implementation, not yet tested.
+        //public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates(int cursor = -1, int size = 10)
+        //{
+        //    var orderedList = context.Hashrate
+        //        .OrderByDescending(e => e.Created);
+        //    return cursor == -1
+        //        ? await orderedList
+        //            .Take(size)
+        //            .ToListAsync()
+        //        : await orderedList
+        //            .SkipWhile(e => e.Id != cursor)
+        //            .Skip(size)
+        //            .Take(size)
+        //            .ToListAsync();
+        //}
 
         // GET /Hashrates/5
         [HttpGet("{id}")]
@@ -85,20 +100,25 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<Hashrate>> PostHashrate(Hashrate hashrate)
         {
+            // Get the worker that is producing the hashrate.
             var worker = await context.Worker
-                .FirstOrDefaultAsync(e => e.Name == hashrate.Worker.Name && e.Address == hashrate.Worker.Address);
+                .FirstOrDefaultAsync(e => 
+                    e.Name == hashrate.Worker.Name && e.Address == hashrate.Worker.Address
+                );
 
             if (worker != null)
             {
+                // Attach existing worker to hashrate.
                 hashrate.Worker = worker;
             } else
             {
-                // Attach existing mining pool to new worker.
                 if(hashrate.Worker.MiningPool != null)
                 {
+                    // Get the mining pool that the new worker is mining to.
                     var miningPool = await context.MiningPool
                         .FirstOrDefaultAsync(e => e.Name == hashrate.Worker.MiningPool.Name);
 
+                    // Attach existing mining pool to new worker.
                     if (miningPool != null)
                     {
                         hashrate.Worker.MiningPool = miningPool;

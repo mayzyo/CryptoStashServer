@@ -55,11 +55,12 @@ namespace CryptoStashStats.Controllers
                 return BadRequest();
             }
 
-            PoolBalance existing;
+            PoolBalance oldPoolBalance;
 
+            // Get old pool balance.
             try
             {
-                existing = await context.PoolBalance
+                oldPoolBalance = await context.PoolBalance
                     .Include(e => e.MiningPool)
                     .FirstAsync(e => e.MiningPool.Name == poolName && e.Address == address);
             }
@@ -68,10 +69,11 @@ namespace CryptoStashStats.Controllers
                 return NotFound();
             }
 
+            // Update "current balance" in old pool balance.
             // TODO: Improve implementation.
-            existing.Current = poolBalance.Current;
+            oldPoolBalance.Current = poolBalance.Current;
 
-            context.Entry(existing).State = EntityState.Modified;
+            context.Entry(oldPoolBalance).State = EntityState.Modified;
 
             try
             {
@@ -157,9 +159,11 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<PoolBalance>> PostPoolBalance(PoolBalance poolBalance)
         {
+            // Get child objects from database.
             var miningPool = await context.MiningPool
                 .FirstOrDefaultAsync(e => e.Name == poolBalance.MiningPool.Name);
 
+            // Attach child objects to the new element.
             if (miningPool != null)
             {
                 poolBalance.MiningPool = miningPool;

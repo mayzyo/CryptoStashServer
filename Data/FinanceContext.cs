@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Data
 {
+    // Database access in the context of finance. This context primarily focuses on integrating data accessed from 3rd party APIs.
     public class FinanceContext : BaseContext
     {
         public DbSet<Coin> Coin { get; set; }

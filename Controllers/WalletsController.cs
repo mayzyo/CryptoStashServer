@@ -121,7 +121,8 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<Wallet>> PostWallet(Wallet wallet)
         {
-            if(wallet.Coin != null)
+            // Get the Coin that is stored by the wallet.
+            if (wallet.Coin != null)
             {
                 var coin = await context.Coin
                     .FirstOrDefaultAsync(e => e.Ticker == wallet.Coin.Ticker);

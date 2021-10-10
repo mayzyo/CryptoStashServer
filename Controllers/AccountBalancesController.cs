@@ -26,7 +26,6 @@ namespace CryptoStashStats.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AccountBalance>>> GetAccountBalances()
         {
-            //return await context.AccountBalance.ToListAsync();
             return await context.AccountBalance
                 .Include(e => e.Account)
                 .Include(e => e.Coin)
@@ -60,11 +59,12 @@ namespace CryptoStashStats.Controllers
                 return BadRequest();
             }
 
-            AccountBalance existing;
+            AccountBalance oldAccountBalance;
 
+            // Get old account balance.
             try
             {
-                existing = await context.AccountBalance
+                oldAccountBalance = await context.AccountBalance
                     .Include(e => e.Account)
                     .Include(e => e.Coin)
                     .FirstAsync(e => e.Coin.Ticker == coinTicker && e.Account.UserId == userId);
@@ -74,10 +74,11 @@ namespace CryptoStashStats.Controllers
                 return NotFound();
             }
 
+            // Update "current balance" in old account balance.
             // TODO: Improve implementation.
-            existing.Current = accountBalance.Current;
+            oldAccountBalance.Current = accountBalance.Current;
 
-            context.Entry(existing).State = EntityState.Modified;
+            context.Entry(oldAccountBalance).State = EntityState.Modified;
 
             try
             {
@@ -125,6 +126,7 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<AccountBalance>> PostAccountBalance(AccountBalance accountBalance)
         {
+            // Get existing child objects from database.
             var account = await context.Account
                 .FirstOrDefaultAsync(e => e.UserId == accountBalance.Account.UserId);
             var provider = await context.Provider
@@ -132,6 +134,7 @@ namespace CryptoStashStats.Controllers
             var coin = await context.Coin
                 .FirstOrDefaultAsync(e => e.Ticker == accountBalance.Coin.Ticker);
 
+            // Attach existing child objects to the new element.
             if (account != null)
             {
                 accountBalance.Account = account;

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Data
 {
+    // Database access in the context of mining. Anything related to mining rig and mining pools should be accessed here.
+    // CONSIDER: Renaming to MiningContext
     public class MinerContext : BaseContext
     {
         public DbSet<Worker> Worker { get; set; }
@@ -22,7 +24,7 @@ namespace CryptoStashStats.Data
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
-        {            
+        {
             builder.Entity<Worker>()
                 .HasIndex(e => new { e.Name, e.Address })
                 .IsUnique();
