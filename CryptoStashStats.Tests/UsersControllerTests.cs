@@ -1,8 +1,10 @@
 using CryptoStashStats.Controllers;
 using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using CryptoStashStats.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,7 +35,8 @@ namespace CryptoStashStats.Tests
 
             using (var context = GenerateNewContext<UserContext>(dbName))
             {
-                var controller = new UsersController(context);
+                var passwordHelper = new Mock<IPasswordHelper>();
+                var controller = new UsersController(context, passwordHelper.Object);
                 // Act
                 var result = await controller.GetUsers();
                 // Assert
@@ -51,7 +54,8 @@ namespace CryptoStashStats.Tests
             using (var context = GenerateNewContext<UserContext>(dbName))
             {
                 // Arrange
-                var controller = new UsersController(context);
+                var passwordHelper = new Mock<IPasswordHelper>();
+                var controller = new UsersController(context, passwordHelper.Object);
                 var newUser = new User() { Id = 2, Username = "Michael" };
                 // Act
                 var result = await controller.PutUser(1, newUser);
