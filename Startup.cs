@@ -1,4 +1,5 @@
 using CryptoStashStats.Data;
+using CryptoStashStats.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,9 @@ namespace CryptoStashStats
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Setup custom services;
+            services.AddSingleton<IPasswordHelper, PasswordHelper>();
+
             // Setup Entity Core connection to PostgreSQL.
             NpgsqlConnectionStringBuilder builder;
             if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_CryptoDb") != null)

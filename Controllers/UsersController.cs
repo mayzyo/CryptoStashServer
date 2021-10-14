@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using CryptoStashStats.Utilities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,10 +19,12 @@ namespace CryptoStashStats.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserContext context;
+        private readonly IPasswordHelper passwordHelper;
 
-        public UsersController(UserContext context)
+        public UsersController(UserContext context, IPasswordHelper passwordHelper)
         {
             this.context = context;
+            this.passwordHelper = passwordHelper;
         }
 
         // GET: /Users
@@ -54,6 +59,11 @@ namespace CryptoStashStats.Controllers
                 return BadRequest();
             }
 
+            // TODO: Password strength check.
+
+            // Hash the password.
+            user.Password = passwordHelper.HashPassword(user.Password);
+
             context.Entry(user).State = EntityState.Modified;
 
             try
@@ -80,6 +90,11 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            // TODO: Password strength check.
+
+            // Hash the password.
+            user.Password = passwordHelper.HashPassword(user.Password);
+
             context.User.Add(user);
             await context.SaveChangesAsync();
 
