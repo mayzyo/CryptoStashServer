@@ -9,6 +9,7 @@ namespace CryptoStashStats.Models
     {
         public int Id { get; set; }
         public int? UserId { get; set; }
+        public string? AuthJson { get; set; }
         public Provider Provider { get; set; }
         public ICollection<AccountBalance>? AccountBalances { get; set; }
     }

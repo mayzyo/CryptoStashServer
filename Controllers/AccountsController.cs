@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -53,7 +54,7 @@ namespace CryptoStashStats.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(int id, Account account)
         {
-            if (id != account.Id)
+            if (id != account.Id || !ValidateJson(account.AuthJson))
             {
                 return BadRequest();
             }
@@ -84,6 +85,11 @@ namespace CryptoStashStats.Controllers
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(Account account)
         {
+            if (!ValidateJson(account.AuthJson))
+            {
+                return BadRequest();
+            }
+
             context.Account.Add(account);
             await context.SaveChangesAsync();
 
@@ -109,6 +115,16 @@ namespace CryptoStashStats.Controllers
         private bool AccountExists(int id)
         {
             return context.Account.Any(e => e.Id == id);
+        }
+
+        private static bool ValidateJson(string json)
+        {
+            if(json != null)
+            {
+                try { return JsonDocument.Parse(json) != null; } catch { }
+            }
+
+            return true;
         }
     }
 }
