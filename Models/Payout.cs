@@ -11,7 +11,7 @@ namespace CryptoStashStats.Models
         public int Id { get; set; }
         public MiningPool MiningPool { get; set; }
         public string? Address { get; set; }
-        public string TXHash { get; set; }
+        public string TXHash { get; set; } // Unique
         public double Amount { get; set; }
         public DateTime Confirmed { get; set; }
         public bool IsConfirmed { get; set; }

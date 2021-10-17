@@ -9,7 +9,7 @@ namespace CryptoStashStats.Models
     public class MiningPool : BaseEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } // Unique
         public ICollection<PoolBalance>? PoolBalances { get; set; }
         public ICollection<Worker>? Workers { get; set; }
     }
