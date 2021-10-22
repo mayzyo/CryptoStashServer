@@ -44,6 +44,44 @@ namespace CryptoStashStats.Controllers
             return coin;
         }
 
+        // PUT: /Coins?coinTicker=abc
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public async Task<IActionResult> PutCoin(string coinTicker, Coin coin)
+        {
+            if (coinTicker != coin.Ticker)
+            {
+                return BadRequest();
+            }
+
+            var oldCoin = await context.Coin
+                .FirstOrDefaultAsync(e => e.Ticker == coinTicker);
+
+            // Update "USD" in old pool coin.
+            // TODO: Improve implementation.
+            oldCoin.USD = coin.USD;
+
+            context.Entry(oldCoin).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CoinExists(coinTicker))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         // PUT: /Coins/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -105,6 +143,11 @@ namespace CryptoStashStats.Controllers
         private bool CoinExists(int id)
         {
             return context.Coin.Any(e => e.Id == id);
+        }
+
+        private bool CoinExists(string ticker)
+        {
+            return context.Coin.Any(e => e.Ticker == ticker);
         }
     }
 }
