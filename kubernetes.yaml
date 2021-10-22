@@ -65,11 +65,22 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: crypto-staging-db
+  name: db-connstr
   namespace: crypto-stash
-type: kubernetes.io/basic-auth
+type: opaque
 stringData:
-  password: Server=125.91.172.1;port=30020;user id=statsuser;password=t0p-Secret;database=crypto_staging_db;pooling=true;Timeout=30
+  staging: Server=125.91.172.1;port=30020;user id=statsuser;password=t0p-Secret;database=crypto_staging_db;pooling=true;Timeout=30
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: password-salt
+  namespace: crypto-stash
+type: opaque
+stringData:
+  staging: t0p-Secret
 
 ---
 
@@ -143,10 +154,15 @@ spec:
         - name: registry.cn-shenzhen.aliyuncs.com
       containers:
         - name: stats-server
-          image: registry.cn-shenzhen.aliyuncs.com/destinesiastudio/crypto-stash-stats:1.0.3
+          image: registry.cn-shenzhen.aliyuncs.com/destinesiastudio/crypto-stash-stats:2.0.0
           env:
             - name: PGSQLCONNSTR_CryptoDb
               valueFrom:
                 secretKeyRef:
-                  name: crypto-staging-db
-                  key: password
+                  name: db-connstr
+                  key: staging
+            - name: PASSWORD_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: password-salt
+                  key: staging
