@@ -1,5 +1,6 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,6 +14,7 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize("mining_audience")]
     public class MiningPoolsController : ControllerBase
     {
         private readonly MinerContext context;
@@ -24,6 +26,7 @@ namespace CryptoStashStats.Controllers
 
         // GET: /MiningPools
         [HttpGet]
+        [Authorize("enumerate_access")]
         public async Task<ActionResult<IEnumerable<MiningPool>>> GetMiningPools()
         {
             return await context.MiningPool.ToListAsync();
@@ -128,6 +131,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /MiningPools/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutMiningPool(int id, MiningPool miningPool)
         {
             if (id != miningPool.Id)
@@ -159,6 +163,7 @@ namespace CryptoStashStats.Controllers
         // POST: /MiningPools
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<MiningPool>> PostMiningPool(MiningPool miningPool)
         {
             context.MiningPool.Add(miningPool);
@@ -169,6 +174,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /MiningPools/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteMiningPool(int id)
         {
             var miningPool = await context.MiningPool.FindAsync(id);

@@ -1,5 +1,6 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,6 +14,7 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize("mining_audience")]
     public class HashratesController : ControllerBase
     {
         private readonly MinerContext context;
@@ -24,29 +26,14 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Hashrates
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates(int page = 1, int size = 10)
+        [Authorize("enumerate_access")]
+        public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates(int cursor = -1, int size = 10)
         {
             return await context.Hashrate
                 .OrderByDescending(e => e.Created)
-                .Skip((page - 1) * size)
-                .Take(size)
+                .Pagination(cursor, size)
                 .ToListAsync();
         }
-        // TODO: Improved implementation, not yet tested.
-        //public async Task<ActionResult<IEnumerable<Hashrate>>> GetHashrates(int cursor = -1, int size = 10)
-        //{
-        //    var orderedList = context.Hashrate
-        //        .OrderByDescending(e => e.Created);
-        //    return cursor == -1
-        //        ? await orderedList
-        //            .Take(size)
-        //            .ToListAsync()
-        //        : await orderedList
-        //            .SkipWhile(e => e.Id != cursor)
-        //            .Skip(size)
-        //            .Take(size)
-        //            .ToListAsync();
-        //}
 
         // GET /Hashrates/5
         [HttpGet("{id}")]
@@ -67,6 +54,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /Hashrates/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutHashrate(int id, Hashrate hashrate)
         {
             if (id != hashrate.Id)
@@ -98,6 +86,7 @@ namespace CryptoStashStats.Controllers
         // POST: /Hashrates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<Hashrate>> PostHashrate(Hashrate hashrate)
         {
             // Get the worker that is producing the hashrate.
@@ -134,6 +123,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /Hashrates/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteHashrate(int id)
         {
             var hashrate = await context.Hashrate.FindAsync(id);

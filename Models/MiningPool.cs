@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Models
 {
-    public class MiningPool : BaseEntity
+    public class MiningPool
     {
         public int Id { get; set; }
-        public string Name { get; set; } // Unique
+        public string Name { get; set; }
         public ICollection<PoolBalance>? PoolBalances { get; set; }
         public ICollection<Worker>? Workers { get; set; }
     }

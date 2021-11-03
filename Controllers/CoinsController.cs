@@ -1,5 +1,6 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,7 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Coins
         [HttpGet]
+        [Authorize("enumerate_access")]
         public async Task<ActionResult<IEnumerable<Coin>>> GetCoins()
         {
             return await context.Coin.ToListAsync();
@@ -47,6 +49,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /Coins?coinTicker=abc
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutCoin(string coinTicker, Coin coin)
         {
             if (coinTicker != coin.Ticker)
@@ -85,6 +88,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /Coins/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutCoin(int id, Coin coin)
         {
             if (id != coin.Id)
@@ -116,6 +120,7 @@ namespace CryptoStashStats.Controllers
         // POST: /Coins
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<Coin>> PostCoin(Coin coin)
         {
             context.Coin.Add(coin);
@@ -126,6 +131,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /Coins/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteCoin(int id)
         {
             var coin = await context.Coin.FindAsync(id);

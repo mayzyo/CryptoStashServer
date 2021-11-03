@@ -1,10 +1,12 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,10 +26,25 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Wallets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets()
+        [Authorize("enumerate_access")]
+        public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets(int cursor = -1, int size = 10)
         {
+            var owner = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Claim has sub assigned, therefore it has to be code flow (user) access.
+            if (owner != null)
+            {
+                return await context.Wallet
+                    .Include(el => el.Coin)
+                    .Where(e => e.Owner == owner)
+                    .Pagination(cursor, size)
+                    .ToListAsync();
+            }
+
+            // No sub found in the claim, it has to be client credential access.
             return await context.Wallet
                 .Include(el => el.Coin)
+                .Pagination(cursor, size)
                 .ToListAsync();
         }
 
@@ -50,6 +67,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /Wallets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutWallet(string address, Wallet wallet)
         {
             if (address != wallet.Address)
@@ -88,6 +106,7 @@ namespace CryptoStashStats.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutWallet(int id, Wallet wallet)
         {
             if (id != wallet.Id)
@@ -119,6 +138,7 @@ namespace CryptoStashStats.Controllers
         // POST: /Wallets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<Wallet>> PostWallet(Wallet wallet)
         {
             // Get the Coin that is stored by the wallet.
@@ -141,6 +161,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /Wallets/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteWallet(int id)
         {
             var wallet = await context.Wallet.FindAsync(id);

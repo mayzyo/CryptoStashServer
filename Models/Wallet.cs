@@ -9,10 +9,11 @@ namespace CryptoStashStats.Models
 {
     public class Wallet : BaseEntity
     {
-        public int Id { get; set; }
+        // DEPRECATED
         public int? UserId { get; set; }
-        public Coin? Coin { get; set; }
+        public string Owner { get; set; }
         public string Address { get; set; }
         public double Balance { get; set; }
+        public Coin? Coin { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Models
 {
-    public class Coin : BaseEntity
+    public class Coin
     {
         public int Id { get; set; }
         public string? Name { get; set; }

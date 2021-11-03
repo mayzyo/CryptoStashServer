@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using CryptoStashStats.Utilities;
+using Microsoft.AspNetCore.Authorization;
 
+// DEPRECATING in favour of ASP Identity.
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly UserContext context;
@@ -27,12 +30,18 @@ namespace CryptoStashStats.Controllers
             this.passwordHelper = passwordHelper;
         }
 
-        // GET: /Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public IActionResult Get()
         {
-            return await context.User.ToListAsync();
+            return new JsonResult(from c in User.Claims select new { c.Type, c.Value });
         }
+
+        // GET: /Users
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        //{
+        //    return await context.User.ToListAsync();
+        //}
 
         // GET /Users/5
         [HttpGet("{id}")]

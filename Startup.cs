@@ -2,12 +2,12 @@ using CryptoStashStats.Data;
 using CryptoStashStats.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using System;
@@ -29,6 +29,30 @@ namespace CryptoStashStats
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Setup OAuth2 JWT.
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = Environment.GetEnvironmentVariable("AUTHORITY_URL");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidAudiences = new[]
+                        {
+                            "urn:finance",
+                            "urn:mining"
+                        },
+                        ValidateAudience = true
+                    };
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("finance_audience", policy => policy.RequireClaim("aud", "urn:finance"));
+                options.AddPolicy("mining_audience", policy => policy.RequireClaim("aud", "urn:mining"));
+                options.AddPolicy("enumerate_access", policy => policy.RequireClaim("scope", "enumerate"));
+                options.AddPolicy("manage_access", policy => policy.RequireClaim("scope", "manage"));
+            });
+
             // Setup custom services.
             services.AddSingleton<IPasswordHelper, PasswordHelper>();
 
@@ -84,7 +108,7 @@ namespace CryptoStashStats
             });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

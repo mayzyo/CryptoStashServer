@@ -1,5 +1,6 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,6 +15,7 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize("finance_audience")]
     public class AccountsController : ControllerBase
     {
         private readonly FinanceContext context;
@@ -25,6 +27,7 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Accounts
         [HttpGet]
+        [Authorize("enumerate_access")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             return await context.Account
@@ -52,6 +55,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutAccount(int id, Account account)
         {
             if (id != account.Id || !ValidateJson(account.AuthJson))
@@ -83,6 +87,7 @@ namespace CryptoStashStats.Controllers
         // POST: /Accounts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<Account>> PostAccount(Account account)
         {
             if (!ValidateJson(account.AuthJson))
@@ -98,6 +103,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /Accounts/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
             var account = await context.Account.FindAsync(id);

@@ -3,15 +3,17 @@ using System;
 using CryptoStashStats.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace CryptoStashStats.Migrations.Miner
 {
     [DbContext(typeof(MinerContext))]
-    partial class MinerContextModelSnapshot : ModelSnapshot
+    [Migration("20211029024053_AdjustedBaseCols")]
+    partial class AdjustedBaseCols
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,10 +136,6 @@ namespace CryptoStashStats.Migrations.Miner
 
                     b.Property<int>("MiningPoolId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Owner")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

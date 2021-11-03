@@ -1,10 +1,12 @@
 ﻿using CryptoStashStats.Data;
 using CryptoStashStats.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,6 +15,7 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize("finance_audience")]
     public class AccountBalancesController : ControllerBase
     {
         private readonly FinanceContext context;
@@ -24,6 +27,7 @@ namespace CryptoStashStats.Controllers
 
         // GET: /AccountBalances
         [HttpGet]
+        [Authorize("enumerate_access")]
         public async Task<ActionResult<IEnumerable<AccountBalance>>> GetAccountBalances()
         {
             return await context.AccountBalance
@@ -32,9 +36,10 @@ namespace CryptoStashStats.Controllers
                 .ToListAsync();
         }
 
-        // GET /AccountBalances/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<AccountBalance>> GetAccountBalance(int id)
+        // GET /AccountBalances/5/Secure
+        [HttpGet("{id}/Secure")]
+        [Authorize("enumerate_access")]
+        public async Task<ActionResult<AccountBalance>> SecureGetAccountBalance(int id)
         {
             var accountBalance = await context.AccountBalance
                 .Include(e => e.Account)
@@ -49,9 +54,24 @@ namespace CryptoStashStats.Controllers
             return accountBalance;
         }
 
+        // GET /AccountBalances/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AccountBalance>> GetAccountBalance(int id)
+        {
+            var accountBalance = await SecureGetAccountBalance(id);
+
+            if (User.FindFirstValue(ClaimTypes.NameIdentifier) != accountBalance.Value.Account.UserId.ToString())
+            {
+                return Forbid();
+            }
+
+            return accountBalance;
+        }
+
         // PUT: /AccountBalances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutAccountBalance(string coinTicker, int userId, AccountBalance accountBalance)
         {
             if (coinTicker != accountBalance.Coin.Ticker || userId != accountBalance.Account.UserId)
@@ -93,6 +113,7 @@ namespace CryptoStashStats.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> PutAccountBalance(int id, AccountBalance accountBalance)
         {
             if (id != accountBalance.Id)
@@ -124,6 +145,7 @@ namespace CryptoStashStats.Controllers
         // POST: /AccountBalances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize("manage_access")]
         public async Task<ActionResult<AccountBalance>> PostAccountBalance(AccountBalance accountBalance)
         {
             // Get existing child objects from database.
@@ -158,6 +180,7 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /AccountBalances/5
         [HttpDelete("{id}")]
+        [Authorize("manage_access")]
         public async Task<IActionResult> DeleteAccountBalance(int id)
         {
             var accountBalance = await context.AccountBalance.FindAsync(id);

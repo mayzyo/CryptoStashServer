@@ -9,7 +9,6 @@ namespace CryptoStashStats.Models
 {
     public class Hashrate : BaseEntity
     {
-        public int Id { get; set; }
         public int Current { get; set; }
         public int Average { get; set; }
         public int Reported { get; set; }
