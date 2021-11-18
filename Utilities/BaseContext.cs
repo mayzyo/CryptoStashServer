@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 // Source: https://threewill.com/how-to-auto-generate-created-updated-field-in-ef-core/
 namespace CryptoStashStats.Utilities
 {
-    public class BaseContext : DbContext
+    public abstract class BaseContext : DbContext
     {
         public BaseContext(DbContextOptions options) : base(options)
         {

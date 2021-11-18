@@ -8,45 +8,48 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Data
 {
-    // Database access in the context of finance. This context primarily focuses on integrating data accessed from 3rd party APIs.
-    public class FinanceContext : BaseContext
+    // Database access in the context of mining. Anything related to mining rig and mining pools should be accessed here.
+    public class FinanceContext : BaseContext, ICurrencyContext
     {
-        public DbSet<Coin> Coin { get; set; }
-        public DbSet<Wallet> Wallet { get; set; }
-        public DbSet<Provider> Provider { get; set; }
-        public DbSet<Account> Account { get; set; }
-        public DbSet<AccountBalance> AccountBalance { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<CurrencyExchange> CurrencyExchanges { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
+        public DbSet<ExchangeAccount> ExchangeAccounts { get; set; }
+        public DbSet<ExchangeAccountApiKey> ExchangeAccountApiKeys { get; set; }
+        public DbSet<ExchangeAccountBalance> ExchangeAccountBalances { get; set; }
 
         public FinanceContext(DbContextOptions<FinanceContext> options) : base(options)
         {
-
+  
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Coin>()
-                .HasIndex(e => e.Ticker)
-                .IsUnique();
+            builder.HasDefaultSchema("financeSchema");
 
-            builder.Entity<Coin>()
-                .HasIndex(e => e.Name)
+            builder.Entity<Currency>()
+                .HasIndex(e => new { e.Ticker, e.Name })
                 .IsUnique();
 
             builder.Entity<Wallet>()
                 .HasIndex(e => e.Address)
                 .IsUnique();
 
-            builder.Entity<Provider>()
+            builder.Entity<CurrencyExchange>()
                 .HasIndex(e => e.Name)
                 .IsUnique();
 
-            builder.Entity<AccountBalance>()
-                .HasIndex(e => new { e.AccountId, e.CoinId })
+            //builder.Entity<ExchangeAccount>()
+            //    .HasIndex(e => new { e.Owner, e.CurrencyExchangeId, e.ExchangeAccountApiKeyId })
+            //    .IsUnique();
+
+            builder.Entity<ExchangeAccountApiKey>()
+                .HasIndex(e => new { e.PublicKey, e.PrivateKey })
                 .IsUnique();
+
+            builder.Entity<Currency>()  // Ignored in this context, it is defined in MiningContext.
+                .Ignore(e => e.MiningPools);
         }
     }
 }
-/*
- * Clear context tables command:
- * TRUNCATE TABLE "Coin" CASCADE;TRUNCATE TABLE "Wallet" CASCADE;TRUNCATE TABLE "Provider" CASCADE;TRUNCATE TABLE "Account" CASCADE;TRUNCATE TABLE "AccountBalance" CASCADE;
- */

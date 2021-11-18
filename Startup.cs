@@ -49,8 +49,9 @@ namespace CryptoStashStats
             {
                 options.AddPolicy("finance_audience", policy => policy.RequireClaim("aud", "urn:finance"));
                 options.AddPolicy("mining_audience", policy => policy.RequireClaim("aud", "urn:mining"));
-                options.AddPolicy("enumerate_access", policy => policy.RequireClaim("scope", "enumerate"));
                 options.AddPolicy("manage_access", policy => policy.RequireClaim("scope", "manage"));
+                options.AddPolicy("read_access", policy => policy.RequireClaim("scope", "finance.read", "mining.read"));
+                options.AddPolicy("write_access", policy => policy.RequireClaim("scope", "finance.write", "mining.write"));
             });
 
             // Setup custom services.
@@ -58,20 +59,25 @@ namespace CryptoStashStats
 
             // Setup Entity Core connection to PostgreSQL.
             NpgsqlConnectionStringBuilder builder;
-            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_CryptoDb") != null)
+            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_StatsDb") != null)
             {
                 // Get connection string from environment variable.
-                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_CryptoDb"));
+                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_StatsDb"));
             } else
             {
                 // Get connection string from user secrets.
-                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("CryptoDb"));
-                if (Configuration["CryptoDb"] != null) builder.Password = Configuration["CryptoDb"];
+                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("StatsDb"));
+                if (Configuration["StatsDb"] != null) builder.Password = Configuration["StatsDb"];
             }
 
-            services.AddDbContext<UserContext>(options => options.UseNpgsql(builder.ConnectionString));
-            services.AddDbContext<MinerContext>(options => options.UseNpgsql(builder.ConnectionString));
-            services.AddDbContext<FinanceContext>(options => options.UseNpgsql(builder.ConnectionString));
+            services.AddDbContext<FinanceContext>(options => options.UseNpgsql(
+                builder.ConnectionString,
+                x => x.MigrationsHistoryTable("__FinanceMigrationsHistory", "financeSchema")
+            ));
+            services.AddDbContext<MiningContext>(options => options.UseNpgsql(
+                builder.ConnectionString,
+                x => x.MigrationsHistoryTable("__MiningMigrationsHistory", "miningSchema")
+            ));
 
             // Setup JSON loop handling.
             services.AddControllers().AddNewtonsoftJson(options =>

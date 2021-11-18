@@ -14,31 +14,31 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize("mining_audience")]
     public class MiningPoolsController : ControllerBase
     {
-        private readonly MinerContext context;
+        private readonly MiningContext context;
 
-        public MiningPoolsController(MinerContext context)
+        public MiningPoolsController(MiningContext context)
         {
             this.context = context;
         }
 
         // GET: /MiningPools
         [HttpGet]
-        [Authorize("enumerate_access")]
         public async Task<ActionResult<IEnumerable<MiningPool>>> GetMiningPools()
         {
-            return await context.MiningPool.ToListAsync();
+            return await context.MiningPools
+                .Include(e => e.Currencies)
+                .ToListAsync();
         }
 
         // GET /MiningPools/5
         [HttpGet("{id}")]
+        [Authorize("manage_access")]
         public async Task<ActionResult<MiningPool>> GetMiningPool(int id)
         {
-            var miningPool = await context.MiningPool
-                .Include(e => e.PoolBalances)
-                .Include(e => e.Workers)
+            var miningPool = await context.MiningPools
+                .Include(e => e.Currencies)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (miningPool == default(MiningPool))
@@ -48,85 +48,6 @@ namespace CryptoStashStats.Controllers
 
             return miningPool;
         }
-
-        // GET: /MiningPools/5/Workers
-        [HttpGet("{id}/Workers")]
-        public async Task<ActionResult<IEnumerable<Worker>>> GetMiningPoolWorkers(int id)
-        {
-            return await context.Worker
-                .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
-                .ToListAsync();
-        }
-
-        // GET: /MiningPools/5/Hashrates
-        //[HttpGet("{id}/Hashrates")]
-        //public async Task<IEnumerable<Hashrate>> GetMiningPoolHashrates(int id, int page = 1, int size = 3)
-        //{
-        //    var test = new Hashrate
-        //    {
-        //        Average = 0,
-        //        Current = 0,
-        //        Reported = 0
-        //    };
-
-        //    //Task.Run(context.Worker
-        //    //    .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
-        //    //    .Include(e => e.Hashrates)
-        //    //    .Select(e => e.Hashrates)
-        //    //    .ToListAsync());
-        //    var t = await context.Worker
-        //        .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
-        //        .Include(e => e.Hashrates)
-        //        .Select(e => e.Hashrates)
-        //        .ToListAsync();
-        //        //.Aggregate((a, c) => c
-        //        ////a.Zip(c, (i, t) => new Hashrate
-        //        ////    {
-        //        ////        Average = i.Average + t.Average,
-        //        ////        Current = i.Current + t.Current,
-        //        ////        Reported = i.Reported + t.Reported,
-        //        ////        Created = t.Created,
-        //        ////    }
-        //        ////)
-        //        //);
-        //    //var workers = await context.Worker
-        //    //    .Where(e => e.MiningPool != null && e.MiningPool.Id == id)
-        //    //    .ToListAsync();
-
-        //    //var workerHashrates = new Dictionary<Worker, IList<Hashrate>>();
-        //    //IEnumerable<Hashrate> prev = new List<Hashrate>();
-
-        //    //int count = 0;
-        //    //foreach (var worker in workers)
-        //    //{
-        //    //    if(count++ > 1)
-        //    //    {
-        //    //        prev = context.Hashrate
-        //    //            .Where(e => e.Worker.Id == worker.Id)
-        //    //            .OrderByDescending(e => e.Created)
-        //    //            .Skip((page - 1) * size)
-        //    //            .Take(size)
-        //    //            .ToList()
-        //    //            .Zip(prev, (i, t) => new Hashrate
-        //    //            {
-        //    //                Average = i.Average + t.Average,
-        //    //                Current = i.Current + t.Current,
-        //    //                Reported = i.Reported + t.Reported,
-        //    //                Created = i.Created
-        //    //            });
-        //    //    } else
-        //    //    {
-        //    //        prev = context.Hashrate
-        //    //            .Where(e => e.Worker.Id == worker.Id)
-        //    //            .OrderByDescending(e => e.Created)
-        //    //            .Skip((page - 1) * size)
-        //    //            .Take(size)
-        //    //            .ToList();
-        //    //    }
-        //    //}
-
-        //    //return prev;
-        //}
 
         // PUT: /MiningPools/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -138,6 +59,26 @@ namespace CryptoStashStats.Controllers
             {
                 return BadRequest();
             }
+
+            //if (miningPool.Currencies != null)
+            //{
+            //    if (miningPool.Currencies.Count == 0)
+            //    {
+            //        var currencies = miningPool.Currencies;
+            //        // Assign an existing Currency and attach entity in order to edit many to many relationship
+            //        miningPool.Currencies = new List<Currency> { await context.Currencies.FirstAsync() };
+            //        context.Attach(miningPool);
+            //        miningPool.Currencies = currencies;
+            //    }
+            //    else
+            //    {
+            //        miningPool.Currencies = await context.Currencies
+            //            .Where(e => miningPool.Currencies.Contains(e))
+            //            .ToListAsync();
+
+            //        context.Attach(miningPool);
+            //    }
+            //}
 
             context.Entry(miningPool).State = EntityState.Modified;
 
@@ -166,7 +107,15 @@ namespace CryptoStashStats.Controllers
         [Authorize("manage_access")]
         public async Task<ActionResult<MiningPool>> PostMiningPool(MiningPool miningPool)
         {
-            context.MiningPool.Add(miningPool);
+            // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
+            if (miningPool.Currencies != null)
+            {
+                miningPool.Currencies = await context.Currencies
+                    .Where(e => miningPool.Currencies.Contains(e))
+                    .ToListAsync();
+            }
+
+            context.MiningPools.Add(miningPool);
             await context.SaveChangesAsync();
 
             return CreatedAtAction("GetMiningPool", new { id = miningPool.Id }, miningPool);
@@ -177,21 +126,55 @@ namespace CryptoStashStats.Controllers
         [Authorize("manage_access")]
         public async Task<IActionResult> DeleteMiningPool(int id)
         {
-            var miningPool = await context.MiningPool.FindAsync(id);
+            var miningPool = await context.MiningPools.FindAsync(id);
             if (miningPool == null)
             {
                 return NotFound();
             }
 
-            context.MiningPool.Remove(miningPool);
+            context.MiningPools.Remove(miningPool);
             await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // PUT: /MiningPools/5/Currencies
+        [HttpPut("{id}/Currencies")]
+        [Authorize("manage_access")]
+        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Currency> currencies)
+        {
+            var miningPool = await context.MiningPools
+                .Include(e => e.Currencies)
+                .FirstAsync(e => e.Id == id);
+
+            miningPool.Currencies = await context.Currencies
+                .Where(e => currencies.Contains(e))
+                .ToListAsync();
+
+            context.Entry(miningPool).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MiningPoolExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }
 
         private bool MiningPoolExists(int id)
         {
-            return context.MiningPool.Any(e => e.Id == id);
+            return context.MiningPools.Any(e => e.Id == id);
         }
     }
 }

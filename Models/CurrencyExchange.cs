@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Models
 {
-    public abstract class Provider : BaseEntity
+    public class CurrencyExchange : Provider
     {
-        public string Name { get; set; }
+        //public ICollection<ExchangeRate>? ExchangeRates { get; set; } // One to Many
     }
 }

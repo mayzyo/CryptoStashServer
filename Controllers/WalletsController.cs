@@ -15,9 +15,23 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize("finance_audience")]
     public class WalletsController : ControllerBase
     {
         private readonly FinanceContext context;
+
+        private IQueryable<Wallet> Wallets
+        {
+            get
+            {
+                var owner = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                // Check if sub is assigned, lacking of is indictive of a client credential access; otherwise a code flow (user) access.
+                var wallets = owner != null
+                    ? context.Wallets.Where(e => e.Owner == owner)
+                    : context.Wallets;
+                return wallets;
+            }
+        }
 
         public WalletsController(FinanceContext context)
         {
@@ -26,35 +40,22 @@ namespace CryptoStashStats.Controllers
 
         // GET: /Wallets
         [HttpGet]
-        [Authorize("enumerate_access")]
-        public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets(int cursor = -1, int size = 10)
+        [Authorize("read_access")]
+        public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets()
         {
-            var owner = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Claim has sub assigned, therefore it has to be code flow (user) access.
-            if (owner != null)
-            {
-                return await context.Wallet
-                    .Include(el => el.Coin)
-                    .Where(e => e.Owner == owner)
-                    .Pagination(cursor, size)
-                    .ToListAsync();
-            }
-
-            // No sub found in the claim, it has to be client credential access.
-            return await context.Wallet
-                .Include(el => el.Coin)
-                .Pagination(cursor, size)
+            return await Wallets
+                .Include(e => e.Currency)
                 .ToListAsync();
         }
 
         // GET /Wallets/5
         [HttpGet("{id}")]
+        [Authorize("read_access")]
         public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
-            var wallet = await context.Wallet
-                .Include(el => el.Coin)
-                .FirstOrDefaultAsync(el => el.Id == id);
+            var wallet = await Wallets
+                .Include(e => e.Currency)
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (wallet == default(Wallet))
             {
@@ -64,54 +65,20 @@ namespace CryptoStashStats.Controllers
             return wallet;
         }
 
-        // PUT: /Wallets
+        // PUT: /Wallets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut]
-        [Authorize("manage_access")]
-        public async Task<IActionResult> PutWallet(string address, Wallet wallet)
-        {
-            if (address != wallet.Address)
-            {
-                return BadRequest();
-            }
-
-            Wallet existing;
-
-            try
-            {
-                existing = await context.Wallet
-                    .Include(e => e.Coin)
-                    .FirstAsync(e => e.Address == address);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-
-            // TODO: Improve implementation.
-            existing.Balance = wallet.Balance;
-
-            context.Entry(existing).State = EntityState.Modified;
-
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
-
-            return NoContent();
-        }
-
         [HttpPut("{id}")]
-        [Authorize("manage_access")]
+        [Authorize("write_access")]
         public async Task<IActionResult> PutWallet(int id, Wallet wallet)
         {
             if (id != wallet.Id)
             {
                 return BadRequest();
+            }
+
+            if (await NotWalletOwner(id))
+            {
+                return Forbid();
             }
 
             context.Entry(wallet).State = EntityState.Modified;
@@ -138,22 +105,18 @@ namespace CryptoStashStats.Controllers
         // POST: /Wallets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize("manage_access")]
+        [Authorize("write_access")]
         public async Task<ActionResult<Wallet>> PostWallet(Wallet wallet)
         {
-            // Get the Coin that is stored by the wallet.
-            if (wallet.Coin != null)
+            if (NotWalletOwner(wallet))
             {
-                var coin = await context.Coin
-                    .FirstOrDefaultAsync(e => e.Ticker == wallet.Coin.Ticker);
-
-                if (coin != null)
-                {
-                    wallet.Coin = coin;
-                }
+                return Forbid();
             }
 
-            context.Wallet.Add(wallet);
+            // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
+            wallet.Currency = await context.Currencies.FindAsync(wallet.Currency.Id);
+
+            context.Wallets.Add(wallet);
             await context.SaveChangesAsync();
 
             return CreatedAtAction("GetWallet", new { id = wallet.Id }, wallet);
@@ -161,16 +124,21 @@ namespace CryptoStashStats.Controllers
 
         // DELETE: /Wallets/5
         [HttpDelete("{id}")]
-        [Authorize("manage_access")]
+        [Authorize("write_access")]
         public async Task<IActionResult> DeleteWallet(int id)
         {
-            var wallet = await context.Wallet.FindAsync(id);
+            var wallet = await context.Wallets.FindAsync(id);
             if (wallet == null)
             {
                 return NotFound();
             }
 
-            context.Wallet.Remove(wallet);
+            if (NotWalletOwner(wallet))
+            {
+                return Forbid();
+            }
+
+            context.Wallets.Remove(wallet);
             await context.SaveChangesAsync();
 
             return NoContent();
@@ -178,7 +146,20 @@ namespace CryptoStashStats.Controllers
 
         private bool WalletExists(int id)
         {
-            return context.Wallet.Any(e => e.Id == id);
+            return context.Wallets.Any(e => e.Id == id);
+        }
+
+        private bool NotWalletOwner(Wallet wallet)
+        {
+            var owner = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return owner != null
+                && User.FindFirstValue(ClaimTypes.NameIdentifier) != wallet.Owner;
+        }
+
+        private async Task<bool> NotWalletOwner(int id)
+        {
+            var wallet = await context.Wallets.FindAsync(id);
+            return NotWalletOwner(wallet);
         }
     }
 }
