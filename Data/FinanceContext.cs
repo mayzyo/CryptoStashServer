@@ -48,8 +48,8 @@ namespace CryptoStashStats.Data
                 .HasIndex(e => new { e.PublicKey, e.PrivateKey })
                 .IsUnique();
 
-            builder.Entity<Currency>()  // Ignored in this context, it is defined in MiningContext.
-                .Ignore(e => e.MiningPools);
+            builder.Entity<Currency>()  // Ignored in this context
+                .Ignore(e => e.MiningPools); // Defined in MiningContext
         }
     }
 }

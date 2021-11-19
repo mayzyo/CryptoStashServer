@@ -43,18 +43,17 @@ namespace CryptoStashStats.Controllers
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<ExchangeAccountBalance>>> GetExchangeAccountBalances(
             int accountId,
-            string? ticker,
+            int? currencyId,
             int cursor = -1,
             int size = 10
             )
         {
-            var exchangeAccountBalances = ticker == null 
-                ? ExchangeAccountBalances 
-                : ExchangeAccountBalances.Where(e => e.Currency.Ticker == ticker);
+            var exchangeAccountBalances = currencyId == 0
+                ? ExchangeAccountBalances.Include(e => e.Currency)
+                : ExchangeAccountBalances.Where(e => e.Currency.Id == currencyId);
 
             return await exchangeAccountBalances
                 .Where(e => e.ExchangeAccount.Id == accountId)
-                .Include(e => e.Currency)
                 .OrderByDescending(e => e.Created)
                 .Pagination(cursor, size)
                 .ToListAsync();

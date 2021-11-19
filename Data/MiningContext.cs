@@ -47,6 +47,9 @@ namespace CryptoStashStats.Data
             //builder.Entity<MiningAccountWithdrawal>()
             //    .HasIndex(e => e.TXHash)
             //    .IsUnique();
+
+            builder.Entity<Currency>()  // Ignored in this context
+                .Ignore(e => e.ExchangeAccounts); // Defined in FinanceContext
         }
     }
 }

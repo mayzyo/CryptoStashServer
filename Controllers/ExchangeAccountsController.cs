@@ -56,6 +56,7 @@ namespace CryptoStashStats.Controllers
             var exchangeAccounts = await ExchangeAccounts
                 .Include(e => e.CurrencyExchange)
                 .Include(e => e.ExchangeAccountApiKey)
+                .Include(e => e.Currencies)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (exchangeAccounts == default(ExchangeAccount))
@@ -81,9 +82,6 @@ namespace CryptoStashStats.Controllers
             {
                 return Forbid();
             }
-
-            //exchangeAccount.CurrencyExchange = await context.CurrencyExchanges
-            //    .FindAsync(exchangeAccount.CurrencyExchange.Id);
 
             context.Entry(exchangeAccount).State = EntityState.Modified;
 
@@ -126,6 +124,14 @@ namespace CryptoStashStats.Controllers
                 return BadRequest("Associated currency exchange not found!");
             }
 
+            // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
+            if (exchangeAccount.Currencies != null)
+            {
+                exchangeAccount.Currencies = await context.Currencies
+                    .Where(e => exchangeAccount.Currencies.Contains(e))
+                    .ToListAsync();
+            }
+
             context.ExchangeAccountApiKeys.Add(exchangeAccount.ExchangeAccountApiKey);
 
             context.ExchangeAccounts.Add(exchangeAccount);
@@ -160,7 +166,7 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /ExchangeAccounts/5
+        // PUT: /ExchangeAccounts/5/ApiKey
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}/ApiKey")]
         [Authorize("write_access")]
@@ -204,6 +210,41 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
+        // PUT: /ExchangeAccounts/5/Currencies
+        [HttpPut("{id}/Currencies")]
+        [Authorize("manage_access")]
+        public async Task<IActionResult> PutExchangeAccountCurrencies(int id, ICollection<Currency> currencies)
+        {
+            var exchangeAccount = await context.ExchangeAccounts
+                .Include(e => e.Currencies)
+                .FirstAsync(e => e.Id == id);
+
+            exchangeAccount.Currencies = await context.Currencies
+                .Where(e => currencies.Contains(e))
+                .ToListAsync();
+
+            context.Entry(exchangeAccount).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExchangeAccountExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+
         private bool ExchangeAccountExists(int id)
         {
             return context.ExchangeAccounts.Any(e => e.Id == id);
@@ -219,6 +260,7 @@ namespace CryptoStashStats.Controllers
         private async Task<bool> NotExchangeAccountOwner(int id)
         {
             var exchangeAccount = await context.ExchangeAccounts.FindAsync(id);
+            context.Entry(exchangeAccount).State = EntityState.Detached;
             return NotExchangeAccountOwner(exchangeAccount);
         }
     }

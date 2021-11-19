@@ -13,6 +13,6 @@ namespace CryptoStashStats.Models
         public ExchangeAccountApiKey ExchangeAccountApiKey { get; set; } // One to One
         public int CurrencyExchangeId { get; set; }
         public CurrencyExchange CurrencyExchange { get; set; } // Many to One
-        //public ICollection<ExchangeAccountBalance>? ExchangeAccountBalances { get; set; } // One to Many
+        public ICollection<Currency>? Currencies { get; set; } // Many to Many
     }
 }
