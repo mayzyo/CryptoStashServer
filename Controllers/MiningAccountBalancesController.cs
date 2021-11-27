@@ -43,14 +43,14 @@ namespace CryptoStashStats.Controllers
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<MiningAccountBalance>>> GetMiningAccountBalances(
             int accountId,
-            string? ticker,
+            int? currencyId,
             int cursor = -1,
             int size = 10
             )
         {
-            var miningAccountBalances = ticker == null 
+            var miningAccountBalances = currencyId == null 
                 ? MiningAccountBalances 
-                : MiningAccountBalances.Where(e => e.Currency.Ticker == ticker);
+                : MiningAccountBalances.Where(e => e.Currency.Id == currencyId);
 
             return await miningAccountBalances
                 .Where(e => e.MiningAccount.Id == accountId)

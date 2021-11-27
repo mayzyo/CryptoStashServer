@@ -174,6 +174,7 @@ namespace CryptoStashStats.Controllers
         private async Task<bool> NotMiningAccountOwner(int id)
         {
             var miningAccount = await context.MiningAccounts.FindAsync(id);
+            context.Entry(miningAccount).State = EntityState.Detached;
             return NotMiningAccountOwner(miningAccount);
         }
     }

@@ -48,7 +48,7 @@ namespace CryptoStashStats.Controllers
             int size = 10
             )
         {
-            var exchangeAccountBalances = currencyId == 0
+            var exchangeAccountBalances = currencyId == null
                 ? ExchangeAccountBalances.Include(e => e.Currency)
                 : ExchangeAccountBalances.Where(e => e.Currency.Id == currencyId);
 

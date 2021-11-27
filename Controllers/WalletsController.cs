@@ -159,6 +159,7 @@ namespace CryptoStashStats.Controllers
         private async Task<bool> NotWalletOwner(int id)
         {
             var wallet = await context.Wallets.FindAsync(id);
+            context.Entry(wallet).State = EntityState.Detached;
             return NotWalletOwner(wallet);
         }
     }

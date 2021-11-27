@@ -144,6 +144,31 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
+        // POST: /MiningWorkers/HashRates
+        [HttpPost("HashRates")]
+        [Authorize("manage_access")]
+        public async Task<ActionResult<MiningWorkerHashRate>> PostMiningWorkerHashRate(MiningWorkerHashRate miningWorkerHashRate)
+        {
+            if(miningWorkerHashRate.MiningWorker.Id != 0)
+            {
+                miningWorkerHashRate.MiningWorker = await context.MiningWorkers
+                    .FindAsync(miningWorkerHashRate.MiningWorker.Id);
+            } else
+            {
+                miningWorkerHashRate.MiningWorker.MiningAccount = await context.MiningAccounts
+                    .FindAsync(miningWorkerHashRate.MiningWorker.MiningAccount.Id);
+            }
+
+            context.MiningWorkerHashRates.Add(miningWorkerHashRate);
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                "GetMiningWorker",
+                new { id = miningWorkerHashRate.MiningWorker.Id },
+                miningWorkerHashRate.MiningWorker
+                );
+        }
+
         private bool MiningWorkerExists(int id)
         {
             return context.MiningWorkers.Any(e => e.Id == id);

@@ -33,6 +33,19 @@ namespace CryptoStashStats.Controllers
             }
         }
 
+        private IQueryable<ExchangeAccountApiKey> ExchangeAccountApiKeys
+        {
+            get
+            {
+                var owner = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                // Check if sub is assigned, lacking of is indictive of a client credential access; otherwise a code flow (user) access.
+                var exchangeAccountApiKeys = owner != null
+                    ? context.ExchangeAccountApiKeys.Where(e => e.ExchangeAccount!.Owner == owner)
+                    : context.ExchangeAccountApiKeys;
+                return exchangeAccountApiKeys;
+            }
+        }
+
         public ExchangeAccountsController(FinanceContext context)
         {
             this.context = context;
@@ -166,9 +179,20 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /ExchangeAccounts/5/ApiKey
+        // GET: /ExchangeAccounts/ApiKeys
+        [HttpGet("ApiKeys")]
+        [Authorize("manage_access")]
+        public async Task<ActionResult<IEnumerable<ExchangeAccountApiKey>>> GetExchangeAccountsApiKeys()
+        {
+            return await ExchangeAccountApiKeys
+                .Include(e => e.ExchangeAccount)
+                .ThenInclude(e => e.CurrencyExchange)
+                .ToListAsync();
+        }
+
+        // PUT: /ExchangeAccounts/5/ApiKeys
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}/ApiKey")]
+        [HttpPut("{id}/ApiKeys")]
         [Authorize("write_access")]
         public async Task<IActionResult> PutExchangeAccountApiKey(int id, ExchangeAccountApiKey exchangeAccountApiKey)
         {
