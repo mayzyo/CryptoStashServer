@@ -12,7 +12,7 @@ using Xunit;
 
 namespace CryptoStashStats.Tests
 {
-    public class ExchangeAccountBalancesControllerTest : EntityControllerTest
+    public class ExchangeAccountsControllerTest : EntityControllerTest
     {
         [Fact]
         public async Task PutExchangeAccount_DoesNotChangeForeignObjects()

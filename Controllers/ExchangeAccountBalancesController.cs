@@ -122,7 +122,8 @@ namespace CryptoStashStats.Controllers
 
             // Get existing account from database.
             exchangeAccountBalance.ExchangeAccount = await context.ExchangeAccounts
-                .FindAsync(exchangeAccountBalance.ExchangeAccount.Id);
+                .Include(e => e.Currencies)
+                .FirstOrDefaultAsync(e => e.Id == exchangeAccountBalance.ExchangeAccount.Id);
 
             // Get existing currency from database.
             exchangeAccountBalance.Currency = await context.Currencies
@@ -135,6 +136,15 @@ namespace CryptoStashStats.Controllers
             else if (exchangeAccountBalance.Currency == null)
             {
                 return BadRequest("Associated currency doesn't exist");
+            }
+
+            if (exchangeAccountBalance.ExchangeAccount.Currencies == null)
+            {
+                exchangeAccountBalance.ExchangeAccount.Currencies = new List<Currency> { exchangeAccountBalance.Currency };
+            }
+            else if (!exchangeAccountBalance.ExchangeAccount.Currencies.Contains(exchangeAccountBalance.Currency))
+            {
+                exchangeAccountBalance.ExchangeAccount.Currencies.Add(exchangeAccountBalance.Currency);
             }
 
             context.ExchangeAccountBalances.Add(exchangeAccountBalance);
