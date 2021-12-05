@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_PASSWORD=abcD1234
+  server:
+    image: crypto-stash-stats:latest
+    depends_on:
+      - database
+    ports:
+      - 5000:80
+    environment:
+      - MIGRATE=true
+      - StatsDb=abcD1234
+      - CUSTOMCONNSTR_StatsDb=Server=192.126.37.93;port=5433;user id=postgres;database=postgres;pooling=true;
+      - AUTHORITY_URL=https://dev.kfntech.com:5002

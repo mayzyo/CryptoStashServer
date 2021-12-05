@@ -58,24 +58,15 @@ namespace CryptoStashStats
             services.AddSingleton<IPasswordHelper, PasswordHelper>();
 
             // Setup Entity Core connection to PostgreSQL.
-            NpgsqlConnectionStringBuilder builder;
-            if (Environment.GetEnvironmentVariable("PGSQLCONNSTR_StatsDb") != null)
-            {
-                // Get connection string from environment variable.
-                builder = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("PGSQLCONNSTR_StatsDb"));
-            } else
-            {
-                // Get connection string from user secrets.
-                builder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("StatsDb"));
-                if (Configuration["StatsDb"] != null) builder.Password = Configuration["StatsDb"];
-            }
-
+            NpgsqlConnectionStringBuilder connBuilder = new NpgsqlConnectionStringBuilder(Configuration.GetConnectionString("StatsDb"));
+            // Get connection string from user secrets.
+            if (Configuration["StatsDb"] != null) connBuilder.Password = Configuration["StatsDb"];
             services.AddDbContext<FinanceContext>(options => options.UseNpgsql(
-                builder.ConnectionString,
+                connBuilder.ConnectionString,
                 x => x.MigrationsHistoryTable("__FinanceMigrationsHistory", "financeSchema")
             ));
             services.AddDbContext<MiningContext>(options => options.UseNpgsql(
-                builder.ConnectionString,
+                connBuilder.ConnectionString,
                 x => x.MigrationsHistoryTable("__MiningMigrationsHistory", "miningSchema")
             ));
 

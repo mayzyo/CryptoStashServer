@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 WORKDIR /app
 EXPOSE 80
-ENV PGSQLCONNSTR_MinerDb=""
+ENV PGSQLCONNSTR_StatsDb=""
 ENV ALLOWED_ORIGINS=""
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
