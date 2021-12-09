@@ -147,6 +147,40 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
+        // PUT: /Wallets/5/Currencies
+        [HttpPut("{id}/Currencies")]
+        [Authorize("manage_access")]
+        public async Task<IActionResult> PutWalletCurrencies(int id, ICollection<Currency> currencies)
+        {
+            var wallet = await context.Wallets
+                .Include(e => e.Currencies)
+                .FirstAsync(e => e.Id == id);
+
+            wallet.Currencies = await context.Currencies
+                .Where(e => currencies.Contains(e))
+                .ToListAsync();
+
+            context.Entry(wallet).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!WalletExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         private bool WalletExists(int id)
         {
             return context.Wallets.Any(e => e.Id == id);
