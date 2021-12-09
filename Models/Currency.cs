@@ -12,6 +12,7 @@ namespace CryptoStashStats.Models
         public string Ticker { get; set; }
         public string Name { get; set; }
         public ICollection<MiningPool>? MiningPools { get; set; } // Many to Many, mapped only in mining context
+        public ICollection<Wallet>? Wallets { get; set; } // Many to Many, mapped only in finance context
         public ICollection<ExchangeAccount>? ExchangeAccounts { get; set; } //Many to Many, mapped only in finance context
     }
 }

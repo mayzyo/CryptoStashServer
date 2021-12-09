@@ -11,7 +11,6 @@ namespace CryptoStashStats.Models
     {
         public string Owner { get; set; }
         public string Address { get; set; }
-        public double? Balance { get; set; }
-        public Currency Currency { get; set; }
+        public ICollection<Currency>? Currencies { get; set; } // Many to Many
     }
 }

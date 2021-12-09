@@ -38,7 +38,7 @@ namespace CryptoStashStats.Controllers
             this.context = context;
         }
 
-        // GET: /ExchangeAccounts/5/Balances?ticker=&cursor=&size=
+        // GET: /ExchangeAccounts/5/Balances?currencyId=&cursor=&size=
         [HttpGet]
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<ExchangeAccountBalance>>> GetExchangeAccountBalances(
@@ -131,7 +131,7 @@ namespace CryptoStashStats.Controllers
 
             if (exchangeAccountBalance.ExchangeAccount == null)
             {
-                return BadRequest("Associated mining pool account not found");
+                return BadRequest("Associated exchange account not found");
             }
             else if (exchangeAccountBalance.Currency == null)
             {

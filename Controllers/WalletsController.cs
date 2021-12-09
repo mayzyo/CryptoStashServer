@@ -43,9 +43,7 @@ namespace CryptoStashStats.Controllers
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets()
         {
-            return await Wallets
-                .Include(e => e.Currency)
-                .ToListAsync();
+            return await Wallets.ToListAsync();
         }
 
         // GET /Wallets/5
@@ -54,7 +52,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
             var wallet = await Wallets
-                .Include(e => e.Currency)
+                .Include(e => e.Currencies)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (wallet == default(Wallet))
@@ -114,7 +112,12 @@ namespace CryptoStashStats.Controllers
             }
 
             // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
-            wallet.Currency = await context.Currencies.FindAsync(wallet.Currency.Id);
+            if (wallet.Currencies != null)
+            {
+                wallet.Currencies = await context.Currencies
+                    .Where(e => wallet.Currencies.Contains(e))
+                    .ToListAsync();
+            }
 
             context.Wallets.Add(wallet);
             await context.SaveChangesAsync();

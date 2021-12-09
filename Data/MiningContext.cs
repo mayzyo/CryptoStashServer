@@ -49,7 +49,8 @@ namespace CryptoStashStats.Data
             //    .IsUnique();
 
             builder.Entity<Currency>()  // Ignored in this context
-                .Ignore(e => e.ExchangeAccounts); // Defined in FinanceContext
+                .Ignore(e => e.ExchangeAccounts) // Defined in FinanceContext
+                .Ignore(e => e.Wallets); // Defined in FinanceContext
         }
     }
 }
