@@ -32,22 +32,6 @@ namespace CryptoStashStats.Controllers
             return await financeContext.Currencies.ToListAsync();
         }
 
-        // GET: /Currencies
-        [HttpGet("contexts/{contextId}")]
-        [Authorize("manage_access")]
-        public async Task<ActionResult<IEnumerable<Currency>>> GetContextCurrencies(string contextId)
-        {
-            if(contextId == "MiningContext")
-            {
-                return await miningContext.Currencies.ToListAsync();
-            } else if(contextId == "FinanceContext")
-            {
-                return await financeContext.Currencies.ToListAsync();
-            }
-
-            return NotFound();
-        }
-
         // GET /Currencies/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Currency>> GetCurrency(int id)
@@ -73,19 +57,28 @@ namespace CryptoStashStats.Controllers
                 return BadRequest();
             }
 
-            var actionResult = await PutCurrency(id, currency, financeContext);
-            if(actionResult != PutCurrency(id, currency, miningContext))
+            var status = await PutCurrency(id, currency, financeContext);
+            if(status != await PutCurrency(id, currency, miningContext))
             {
                 throw new Exception("Out of Sync!");
             }
 
-            return actionResult;
+            if(status == 1)
+            {
+                return BadRequest();
+            }
+            else if(status == 2)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
-        public async Task<IActionResult> PutCurrency<T>(int id, Currency currency, T context) where T : DbContext, ICurrencyContext
+        public async Task<int> PutCurrency<T>(int id, Currency currency, T context) where T : DbContext, ICurrencyContext
         {
             if (id != currency.Id)
             {
-                return BadRequest();
+                return 1; // BadRequest();
             }
 
             context.Entry(currency).State = EntityState.Modified;
@@ -98,7 +91,7 @@ namespace CryptoStashStats.Controllers
             {
                 if (!CurrencyExists(id, context))
                 {
-                    return NotFound();
+                    return 2; // NotFound();
                 }
                 else
                 {
@@ -106,9 +99,8 @@ namespace CryptoStashStats.Controllers
                 }
             }
 
-            return NoContent();
+            return 0; // NoContent();
         }
-
 
         // POST: /Currencies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -133,27 +125,69 @@ namespace CryptoStashStats.Controllers
         [Authorize("manage_access")]
         public async Task<IActionResult> DeleteCurrency(int id)
         {
-            var actionResult = await DeleteCurrency(id, financeContext);
-            if (actionResult != await DeleteCurrency(id, miningContext))
+            var status = await DeleteCurrency(id, financeContext);
+            if (status != await DeleteCurrency(id, miningContext))
             {
                 throw new Exception("Out of Sync!");
             }
 
-            return actionResult;
+            if (status == 1)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
 
-        public async Task<IActionResult> DeleteCurrency<T>(int id, T context) where T : DbContext, ICurrencyContext
+        public async Task<int> DeleteCurrency<T>(int id, T context) where T : DbContext, ICurrencyContext
         {
             var Currency = await context.Currencies.FindAsync(id);
             if (Currency == null)
             {
-                return NotFound();
+                return 1;
             }
 
             context.Currencies.Remove(Currency);
             await context.SaveChangesAsync();
 
-            return NoContent();
+            return 0;
+        }
+
+        // GET: /Currencies/Contexts/MiningContext
+        // For debuggin only
+        [HttpGet("contexts/{contextId}")]
+        [Authorize("manage_access")]
+        public async Task<ActionResult<IEnumerable<Currency>>> GetContextCurrencies(string contextId)
+        {
+            if (contextId == "MiningContext")
+            {
+                return await miningContext.Currencies.ToListAsync();
+            }
+            else if (contextId == "FinanceContext")
+            {
+                return await financeContext.Currencies.ToListAsync();
+            }
+
+            return NotFound();
+        }
+
+        // GET /Currencies/5/Wallets?cursor=&size=
+        [HttpGet("{id}/Wallets")]
+        public async Task<ActionResult<IEnumerable<Wallet>>> GetCurrencyWallets(int id, int cursor = -1, int size = 10)
+        {
+            var currency = await financeContext.Currencies.FindAsync(id);
+
+            if (currency == default(Currency))
+            {
+                return NotFound();
+            }
+
+            var wallets = await financeContext.Wallets
+                .Where(e => e.Currencies.Contains(currency))
+                .Pagination(cursor, size)
+                .ToListAsync();
+
+            return wallets;
         }
 
         private static bool CurrencyExists(int id, ICurrencyContext context)

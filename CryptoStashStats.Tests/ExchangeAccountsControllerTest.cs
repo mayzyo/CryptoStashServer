@@ -27,21 +27,30 @@ namespace CryptoStashStats.Tests
                 ExchangeAccountApiKey = apiKey
             };
 
-            using var context = StubContext<FinanceContext>();
-            context.CurrencyExchanges.Add(currencyExchange);
-            context.ExchangeAccounts.Add(exchangeAccount);
-            context.SaveChanges();
-
-            var controller = CreateControllerWithUserClaim<ExchangeAccountsController>(context);
+            using var arrangeContext = StubContext<FinanceContext>();
+            arrangeContext.CurrencyExchanges.Add(currencyExchange);
+            arrangeContext.ExchangeAccounts.Add(exchangeAccount);
+            arrangeContext.SaveChanges();
+            arrangeContext.Dispose();
 
             // Act
-            exchangeAccount.ExchangeAccountApiKey.PublicKey = "efgh";
-            exchangeAccount.CurrencyExchange.Name = "HUOBI";
-            await controller.PutExchangeAccount(exchangeAccount.Id, exchangeAccount);
+            using var actContext = StubContext<FinanceContext>();
+            var controller = CreateControllerWithUserClaim<ExchangeAccountsController>(actContext);
+            await controller.PutExchangeAccount(
+                exchangeAccount.Id,
+                new ExchangeAccount
+                {
+                    Owner = "user1",
+                    CurrencyExchange = new CurrencyExchange { Name = "HUOBI" },
+                    ExchangeAccountApiKey = new ExchangeAccountApiKey { PublicKey = "efgh", PrivateKey = "1234" }
+        }
+                );
+            actContext.Dispose();
 
             // Assert
+            using var assertConext = StubContext<FinanceContext>();
             var model = Assert.Single(
-                await context.ExchangeAccounts
+                await assertConext.ExchangeAccounts
                     .Include(e => e.CurrencyExchange)
                     .Include(e => e.ExchangeAccountApiKey)
                     .ToListAsync()
@@ -49,10 +58,10 @@ namespace CryptoStashStats.Tests
             Assert.Equal(model.CurrencyExchange.Name, currencyExchange.Name);
             Assert.Equal(model.ExchangeAccountApiKey.PublicKey, apiKey.PublicKey);
 
-            var currencyExchangeModel = Assert.Single(await context.CurrencyExchanges.ToListAsync());
+            var currencyExchangeModel = Assert.Single(await assertConext.CurrencyExchanges.ToListAsync());
             Assert.Equal(currencyExchangeModel.Name, currencyExchange.Name);
 
-            var apiKeyModel = Assert.Single(await context.ExchangeAccountApiKeys.ToListAsync());
+            var apiKeyModel = Assert.Single(await assertConext.ExchangeAccountApiKeys.ToListAsync());
             Assert.Equal(apiKeyModel.PublicKey, apiKey.PublicKey);
         }
 

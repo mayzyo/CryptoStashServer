@@ -17,53 +17,51 @@ namespace CryptoStashStats.Tests
         public async Task PutMiningPool_DoesNotAlterCurrenciesProperty()
         {
             // Arrange
-            var original = new Currency { Ticker = "eth", Name = "Ethereum" };
-            var original2 = new Currency { Ticker = "zil", Name = "Zilliqa" };
+            var currency1 = new Currency { Ticker = "eth", Name = "Ethereum" };
+            var currency2 = new Currency { Ticker = "zil", Name = "Zilliqa" };
+            var miningPool = new MiningPool
+            {
+                Name = "My Pool",
+                Currencies = new List<Currency> { currency1 }
+            };
 
-            using var financeContext = StubContext<FinanceContext>();
-            financeContext.Currencies.Add(original);
-            financeContext.Currencies.Add(original2);
-            financeContext.SaveChanges();
-
-            using var miningContext = StubContext<MiningContext>();
-            miningContext.MiningPools.Add(
-                new MiningPool
-                {
-                    Name = "My Pool",
-                    Currencies = new Currency[] {
-                        original
-                        //new Currency { Id = 1, Ticker = "eth", Name = "Ethereum" },
-                    }
-                }
-                );
-            miningContext.Currencies.Add(original2);
-            miningContext.SaveChanges();
+            using var arrangeContext = StubContext<MiningContext>();
+            arrangeContext.Currencies.Add(currency1);
+            arrangeContext.Currencies.Add(currency2);
+            arrangeContext.MiningPools.Add(miningPool);
+            arrangeContext.SaveChanges();
+            arrangeContext.Dispose();
 
             // Act
-            using var financeContext2 = StubContext<FinanceContext>();
-            using var miningContext2 = StubContext<MiningContext>();
-            var controller = CreateControllerWithUserClaim<MiningPoolsController>(miningContext2);
+            using var actContext = StubContext<MiningContext>();
+            var controller = CreateControllerWithUserClaim<MiningPoolsController>(actContext);
             await controller.PutMiningPool(
                 1,
                 new MiningPool
                 {
                     Id = 1,
                     Name = "My Pool",
-                    Currencies = new Currency[]
+                    Currencies = new List<Currency>
                     {
-                        new Currency { Id = 1, Ticker = "eth", Name = "Ethereum" },
-                        new Currency { Id = 2, Ticker = "zil", Name = "Ethereum" }
+                        new Currency { Id = 1, Ticker = "eth", Name = "Zilliqa" },
+                        new Currency { Id = 2, Ticker = "zil", Name = "Zilliqa" }
                     }
-                    //Currencies = new List<Currency>()
                 }
                 );
-            var miningPools = await miningContext2.MiningPools.Include(e => e.Currencies).ToListAsync();
+            actContext.Dispose();
 
             // Assert
-            // Check if element currencies has 2 elements.
-            Assert.Equal(2, miningPools.Single().Currencies.Count);
-            // Check if the second element is unchanged.
-            Assert.Equal(original2.Name, miningPools.Single().Currencies.First(e => e.Id == original2.Id).Name);
+            using var assertContext = StubContext<MiningContext>();
+            var miningPools = await assertContext.MiningPools
+                .Include(e => e.Currencies)
+                .ToListAsync();
+            // Check if element currencies has 1 elements.
+            Assert.Equal(1, miningPools.Single().Currencies.Count);
+            // Check if the element is unchanged.
+            Assert.Equal(
+                currency1.Name,
+                miningPools.Single().Currencies.First(e => e.Id == currency1.Id).Name
+                );
         }
 
         [Fact]

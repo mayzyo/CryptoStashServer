@@ -66,30 +66,70 @@ namespace CryptoStashStats.Tests
         public async Task DeleteCurrency_DeletesFromMultipleContext()
         {
             // Arrange
-            using var financeContext = StubContext<FinanceContext>();
-            financeContext.Currencies.Add(
+            using var arrangeFContext = StubContext<FinanceContext>();
+            arrangeFContext.Currencies.Add(
                 new Currency { Ticker = "eth", Name = "Ethereum" }
                 );
-            financeContext.SaveChanges();
+            arrangeFContext.SaveChanges();
 
-            using var miningContext = StubContext<MiningContext>();
-            miningContext.Currencies.Add(
+            using var arrangeMContext = StubContext<MiningContext>();
+            arrangeMContext.Currencies.Add(
                 new Currency { Ticker = "eth", Name = "Ethereum" }
                 );
-            miningContext.SaveChanges();
+            arrangeMContext.SaveChanges();
+
+            arrangeFContext.Dispose();
+            arrangeMContext.Dispose();
 
             // Act
-            using var financeContext2 = StubContext<FinanceContext>();
-            using var miningContext2 = StubContext<MiningContext>();
-            var controller = new CurrenciesController(financeContext2, miningContext2);
+            using var actFContext = StubContext<FinanceContext>();
+            using var actMContext = StubContext<MiningContext>();
+            var controller = CreateControllerWithUserClaim<CurrenciesController>(actFContext, actMContext);
             await controller.DeleteCurrency(1);
-            var financeResult = await financeContext2.Currencies.AnyAsync();
-            var miningResult = await miningContext2.Currencies.AnyAsync();
+
+            actFContext.Dispose();
+            actMContext.Dispose();
 
             // Assert
-            Assert.Equal(financeResult, miningResult);
+            using var assertFContext = StubContext<FinanceContext>();
+            using var assertMContext = StubContext<MiningContext>();
+            var financeResult = await assertFContext.Currencies.AnyAsync();
+            var miningResult = await assertMContext.Currencies.AnyAsync();
             Assert.False(financeResult);
             Assert.False(miningResult);
+        }
+
+        [Fact]
+        public async Task GetCurrencyWallets_ReturnsWallets()
+        {
+            // Arrange
+            var currency = new Currency { Name = "ETHEREUM", Ticker = "ETH" };
+            var wallet = new Wallet
+            {
+                Owner = "user1",
+                Address = "abcd",
+                Currencies = new List<Currency>() { currency }
+            };
+
+            using var arrangeContext = StubContext<FinanceContext>();
+            arrangeContext.Currencies.Add(currency);
+            arrangeContext.Wallets.Add(wallet);
+            arrangeContext.SaveChanges();
+            arrangeContext.Dispose();
+
+            // Act
+            using var actFContext = StubContext<FinanceContext>();
+            using var actMContext = StubContext<MiningContext>();
+            var controller = CreateControllerWithUserClaim<CurrenciesController>(actFContext, actMContext);
+            var result = await controller.GetCurrencyWallets(currency.Id);
+            actFContext.Dispose();
+            actMContext.Dispose();
+
+            // Assert
+            var viewResult = Assert.IsType<ActionResult<IEnumerable<Wallet>>>(result);
+            var model = Assert.IsAssignableFrom<List<Wallet>>(viewResult.Value);
+            var walletModel = Assert.Single(model);
+            Assert.Equal(walletModel.Id, wallet.Id);
         }
     }
 }
