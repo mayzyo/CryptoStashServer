@@ -12,6 +12,7 @@ namespace CryptoStashStats.Data
     public class FinanceContext : BaseContext, ICurrencyContext
     {
         public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Blockchain> Blockchains { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<WalletBalance> WalletBalances { get; set; }
         public DbSet<CurrencyExchange> CurrencyExchanges { get; set; }
@@ -29,12 +30,20 @@ namespace CryptoStashStats.Data
         {
             builder.HasDefaultSchema("financeSchema");
 
+            builder.Entity<Blockchain>()
+                .HasOne(e => e.NativeCurrency)
+                .WithOne(e => e.NativeBlockchain);
+
             builder.Entity<Currency>()
                 .HasIndex(e => new { e.Ticker, e.Name })
                 .IsUnique();
 
+            builder.Entity<Blockchain>()
+                .HasIndex(e => e.Name)
+                .IsUnique();
+
             builder.Entity<Wallet>()
-                .HasIndex(e => e.Address)
+                .HasIndex(e => new { e.Address, e.BlockchainId })
                 .IsUnique();
 
             builder.Entity<CurrencyExchange>()

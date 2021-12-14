@@ -20,8 +20,7 @@
       "commandName": "Project",
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "AUTHORITY_URL": "https://dev.kfntech.com:5002"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "http://localhost:5000"

@@ -171,24 +171,24 @@ namespace CryptoStashStats.Controllers
             return NotFound();
         }
 
-        // GET /Currencies/5/Wallets?cursor=&size=
-        [HttpGet("{id}/Wallets")]
-        public async Task<ActionResult<IEnumerable<Wallet>>> GetCurrencyWallets(int id, int cursor = -1, int size = 10)
-        {
-            var currency = await financeContext.Currencies.FindAsync(id);
+        //// GET /Currencies/5/Wallets?cursor=&size=
+        //[HttpGet("{id}/Wallets")]
+        //public async Task<ActionResult<IEnumerable<Wallet>>> GetCurrencyWallets(int id, int cursor = -1, int size = 10)
+        //{
+        //    var currency = await financeContext.Currencies.FindAsync(id);
 
-            if (currency == default(Currency))
-            {
-                return NotFound();
-            }
+        //    if (currency == default(Currency))
+        //    {
+        //        return NotFound();
+        //    }
 
-            var wallets = await financeContext.Wallets
-                .Where(e => e.Currencies.Contains(currency))
-                .Pagination(cursor, size)
-                .ToListAsync();
+        //    var wallets = await financeContext.Wallets
+        //        .Where(e => e.Currencies.Contains(currency))
+        //        .Pagination(cursor, size)
+        //        .ToListAsync();
 
-            return wallets;
-        }
+        //    return wallets;
+        //}
 
         private static bool CurrencyExists(int id, ICurrencyContext context)
         {

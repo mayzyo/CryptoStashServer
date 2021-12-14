@@ -122,12 +122,9 @@ namespace CryptoStashStats.Controllers
 
             // Get existing account from database.
             walletBalance.Wallet = await context.Wallets
+                .Include(e => e.Blockchain)
                 .Include(e => e.Currencies)
                 .FirstOrDefaultAsync(e => e.Id == walletBalance.Wallet.Id);
-
-            // Get existing currency from database.
-            walletBalance.Currency = await context.Currencies
-                .FindAsync(walletBalance.Currency.Id);
 
             if (walletBalance.Wallet == null)
             {
@@ -138,6 +135,10 @@ namespace CryptoStashStats.Controllers
                 return BadRequest("Associated currency doesn't exist");
             }
 
+            // Get existing currency from database.
+            walletBalance.Currency = await context.Currencies
+                .FindAsync(walletBalance.Currency.Id);
+
             if (walletBalance.Wallet.Currencies == null)
             {
                 walletBalance.Wallet.Currencies = new List<Currency> { walletBalance.Currency };
@@ -145,6 +146,18 @@ namespace CryptoStashStats.Controllers
             else if (!walletBalance.Wallet.Currencies.Contains(walletBalance.Currency))
             {
                 walletBalance.Wallet.Currencies.Add(walletBalance.Currency);
+            }
+
+            // Add new currencies to existing currencies in blockchain
+            if (walletBalance.Wallet.Blockchain.Currencies != null)
+            {
+                walletBalance.Wallet.Blockchain.Currencies = walletBalance.Wallet.Blockchain.Currencies
+                    .Union(walletBalance.Wallet.Currencies)
+                    .ToList();
+            }
+            else // Set currencies as blockchain's currencies
+            {
+                walletBalance.Wallet.Blockchain.Currencies = walletBalance.Wallet.Currencies;
             }
 
             context.WalletBalances.Add(walletBalance);

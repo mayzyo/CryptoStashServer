@@ -11,6 +11,8 @@ namespace CryptoStashStats.Models
     {
         public string Owner { get; set; }
         public string Address { get; set; }
+        public int BlockchainId { get; set; } // Unique FK need to be declared to use in DataContext.
+        public Blockchain Blockchain { get; set; } // Many to One
         public ICollection<Currency>? Currencies { get; set; } // Many to Many
     }
 }

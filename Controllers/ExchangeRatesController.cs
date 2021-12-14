@@ -47,7 +47,6 @@ namespace CryptoStashStats.Controllers
 
         // GET /CurrencyExchanges/5/ExchangeRates/5
         [HttpGet("{id}")]
-        [Authorize("enumerate_access")]
         public async Task<ActionResult<ExchangeRate>> GetExchangeRate(int exchangeId, int id)
         {
             var exchangeRate = await context.ExchangeRates

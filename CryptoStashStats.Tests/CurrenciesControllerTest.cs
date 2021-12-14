@@ -99,37 +99,37 @@ namespace CryptoStashStats.Tests
             Assert.False(miningResult);
         }
 
-        [Fact]
-        public async Task GetCurrencyWallets_ReturnsWallets()
-        {
-            // Arrange
-            var currency = new Currency { Name = "ETHEREUM", Ticker = "ETH" };
-            var wallet = new Wallet
-            {
-                Owner = "user1",
-                Address = "abcd",
-                Currencies = new List<Currency>() { currency }
-            };
+        //[Fact]
+        //public async Task GetCurrencyWallets_ReturnsWallets()
+        //{
+        //    // Arrange
+        //    var currency = new Currency { Name = "ETHEREUM", Ticker = "ETH" };
+        //    var wallet = new Wallet
+        //    {
+        //        Owner = "user1",
+        //        Address = "abcd",
+        //        Currencies = new List<Currency>() { currency }
+        //    };
 
-            using var arrangeContext = StubContext<FinanceContext>();
-            arrangeContext.Currencies.Add(currency);
-            arrangeContext.Wallets.Add(wallet);
-            arrangeContext.SaveChanges();
-            arrangeContext.Dispose();
+        //    using var arrangeContext = StubContext<FinanceContext>();
+        //    arrangeContext.Currencies.Add(currency);
+        //    arrangeContext.Wallets.Add(wallet);
+        //    arrangeContext.SaveChanges();
+        //    arrangeContext.Dispose();
 
-            // Act
-            using var actFContext = StubContext<FinanceContext>();
-            using var actMContext = StubContext<MiningContext>();
-            var controller = CreateControllerWithUserClaim<CurrenciesController>(actFContext, actMContext);
-            var result = await controller.GetCurrencyWallets(currency.Id);
-            actFContext.Dispose();
-            actMContext.Dispose();
+        //    // Act
+        //    using var actFContext = StubContext<FinanceContext>();
+        //    using var actMContext = StubContext<MiningContext>();
+        //    var controller = CreateControllerWithUserClaim<CurrenciesController>(actFContext, actMContext);
+        //    var result = await controller.GetCurrencyWallets(currency.Id);
+        //    actFContext.Dispose();
+        //    actMContext.Dispose();
 
-            // Assert
-            var viewResult = Assert.IsType<ActionResult<IEnumerable<Wallet>>>(result);
-            var model = Assert.IsAssignableFrom<List<Wallet>>(viewResult.Value);
-            var walletModel = Assert.Single(model);
-            Assert.Equal(walletModel.Id, wallet.Id);
-        }
+        //    // Assert
+        //    var viewResult = Assert.IsType<ActionResult<IEnumerable<Wallet>>>(result);
+        //    var model = Assert.IsAssignableFrom<List<Wallet>>(viewResult.Value);
+        //    var walletModel = Assert.Single(model);
+        //    Assert.Equal(walletModel.Id, wallet.Id);
+        //}
     }
 }

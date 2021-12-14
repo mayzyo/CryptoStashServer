@@ -33,7 +33,8 @@ namespace CryptoStashStats
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
-                    options.Authority = Environment.GetEnvironmentVariable("AUTHORITY_URL");
+                    options.Authority = Configuration.GetValue<string>("IdentityServerAddress");
+                    //options.Authority = Environment.GetEnvironmentVariable("AUTHORITY_URL");
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidAudiences = new[]
@@ -78,7 +79,21 @@ namespace CryptoStashStats
             // Generate OpenAPI JSON file.
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CryptoStashStats", Version = "v3" });
+                c.SwaggerDoc("v2", new OpenApiInfo { Title = "CryptoStashStats", Version = "v3" });
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        ClientCredentials = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(Configuration.GetValue<string>("IdentityServerAddress") + "/connect/authorize"),
+                            TokenUrl = new Uri(Configuration.GetValue<string>("IdentityServerAddress") + "/connect/token"),
+                            Scopes = AuthorizeOperationFilter.Scopes
+                        }
+                    }
+                });
+                c.OperationFilter<AuthorizeOperationFilter>();
             });
             services.AddSwaggerGenNewtonsoftSupport();
         }
@@ -90,7 +105,15 @@ namespace CryptoStashStats
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CryptoStashStats v1"));
+                app.UseSwaggerUI(c => 
+                {
+                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "CryptoStashStats v2");
+                    if (Configuration["SwaggerSecret"] != null)
+                    {
+                        c.OAuthClientId("postman");
+                        c.OAuthClientSecret(Configuration["SwaggerSecret"]);
+                    }
+                });
             }
 
             // Setup CORS policy based on environment variable.
