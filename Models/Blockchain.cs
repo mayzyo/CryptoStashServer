@@ -10,9 +10,9 @@ namespace CryptoStashStats.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int? NativeCurrencyId { get; set; } // Ambiguity on dependent side
-        public Currency? NativeCurrency { get; set; } // One to One
-        public ICollection<Currency>? Currencies { get; set; } // Many to Many
+        public int? NativeTokenId { get; set; } // Unique FK need to be declared to use in DataContext.
+        public Token? NativeToken { get; set; } // One to One
+        public ICollection<Token>? Tokens { get; set; } // Many to Many
         public ICollection<Wallet>? Wallets { get; set; } // One to Many
 
     }

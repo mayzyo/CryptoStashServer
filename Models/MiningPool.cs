@@ -8,6 +8,6 @@ namespace CryptoStashStats.Models
 {
     public class MiningPool : Provider
     {
-        public ICollection<Currency>? Currencies { get; set; } // Many to Many
+        public ICollection<Token>? Tokens { get; set; } // Many to Many
     }
 }

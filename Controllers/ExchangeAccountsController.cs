@@ -69,7 +69,7 @@ namespace CryptoStashStats.Controllers
             var exchangeAccounts = await ExchangeAccounts
                 .Include(e => e.CurrencyExchange)
                 .Include(e => e.ExchangeAccountApiKey)
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (exchangeAccounts == default(ExchangeAccount))
@@ -138,10 +138,10 @@ namespace CryptoStashStats.Controllers
             }
 
             // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
-            if (exchangeAccount.Currencies != null)
+            if (exchangeAccount.Tokens != null)
             {
-                exchangeAccount.Currencies = await context.Currencies
-                    .Where(e => exchangeAccount.Currencies.Contains(e))
+                exchangeAccount.Tokens = await context.Tokens
+                    .Where(e => exchangeAccount.Tokens.Contains(e))
                     .ToListAsync();
             }
 
@@ -237,13 +237,13 @@ namespace CryptoStashStats.Controllers
         // PUT: /ExchangeAccounts/5/Currencies
         [HttpPut("{id}/Currencies")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutExchangeAccountCurrencies(int id, ICollection<Currency> currencies)
+        public async Task<IActionResult> PutExchangeAccountCurrencies(int id, ICollection<Token> currencies)
         {
             var exchangeAccount = await context.ExchangeAccounts
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
-            exchangeAccount.Currencies = await context.Currencies
+            exchangeAccount.Tokens = await context.Tokens
                 .Where(e => currencies.Contains(e))
                 .ToListAsync();
 

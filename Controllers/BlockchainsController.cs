@@ -28,7 +28,9 @@ namespace CryptoStashStats.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Blockchain>>> GetBlockchains()
         {
-            return await context.Blockchains.ToListAsync();
+            return await context.Blockchains
+                .Include(e => e.NativeToken)
+                .ToListAsync();
         }
 
         // GET /Blockchains/5
@@ -36,8 +38,8 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<Blockchain>> GetBlockchain(int id)
         {
             var blockchain = await context.Blockchains
-                .Include(e => e.NativeCurrency)
-                .Include(e => e.Currencies)
+                .Include(e => e.NativeToken)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (blockchain == default(Blockchain))
@@ -86,16 +88,16 @@ namespace CryptoStashStats.Controllers
         [Authorize("manage_access")]
         public async Task<ActionResult<Blockchain>> PostBlockchain(Blockchain blockchain)
         {
-            if (blockchain.NativeCurrency != null && blockchain.NativeCurrency.Id != 0)
+            if (blockchain.NativeToken != null && blockchain.NativeToken.Id != 0)
             {
-                blockchain.NativeCurrency = await context.Currencies
-                    .FindAsync(blockchain.NativeCurrency.Id);
+                blockchain.NativeToken = await context.Tokens
+                    .FindAsync(blockchain.NativeToken.Id);
             }
             // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
-            if (blockchain.Currencies != null)
+            if (blockchain.Tokens != null)
             {
-                blockchain.Currencies = await context.Currencies
-                    .Where(e => blockchain.Currencies.Contains(e))
+                blockchain.Tokens = await context.Tokens
+                    .Where(e => blockchain.Tokens.Contains(e))
                     .ToListAsync();
             }
 
@@ -128,13 +130,13 @@ namespace CryptoStashStats.Controllers
         // PUT: /Blockchains/5/Currencies
         [HttpPut("{id}/Currencies")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutBlockchainCurrencies(int id, ICollection<Currency> currencies)
+        public async Task<IActionResult> PutBlockchainCurrencies(int id, ICollection<Token> currencies)
         {
             var blockchain = await context.Blockchains
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
-            blockchain.Currencies = await context.Currencies
+            blockchain.Tokens = await context.Tokens
                 .Where(e => currencies.Contains(e))
                 .ToListAsync();
 

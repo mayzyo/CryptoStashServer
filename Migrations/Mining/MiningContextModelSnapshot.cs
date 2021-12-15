@@ -20,29 +20,6 @@ namespace CryptoStashStats.Migrations.Mining
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("CryptoStashStats.Models.Currency", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Ticker")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Ticker", "Name")
-                        .IsUnique();
-
-                    b.ToTable("Currencies");
-                });
-
             modelBuilder.Entity("CryptoStashStats.Models.MiningAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -87,9 +64,6 @@ namespace CryptoStashStats.Migrations.Mining
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("timestamp without time zone");
 
@@ -99,11 +73,14 @@ namespace CryptoStashStats.Migrations.Mining
                     b.Property<double>("Savings")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("TokenId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrencyId");
-
                     b.HasIndex("MiningAccountId");
+
+                    b.HasIndex("TokenId");
 
                     b.ToTable("MiningAccountBalances");
                 });
@@ -195,19 +172,44 @@ namespace CryptoStashStats.Migrations.Mining
                     b.ToTable("MiningWorkerHashRates");
                 });
 
-            modelBuilder.Entity("CurrencyMiningPool", b =>
+            modelBuilder.Entity("CryptoStashStats.Models.Token", b =>
                 {
-                    b.Property<int>("CurrenciesId")
-                        .HasColumnType("integer");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ticker")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name", "Ticker", "Address")
+                        .IsUnique();
+
+                    b.ToTable("Tokens");
+                });
+
+            modelBuilder.Entity("MiningPoolToken", b =>
+                {
                     b.Property<int>("MiningPoolsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CurrenciesId", "MiningPoolsId");
+                    b.Property<int>("TokensId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("MiningPoolsId");
+                    b.HasKey("MiningPoolsId", "TokensId");
 
-                    b.ToTable("CurrencyMiningPool");
+                    b.HasIndex("TokensId");
+
+                    b.ToTable("MiningPoolToken");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.MiningAccount", b =>
@@ -223,19 +225,19 @@ namespace CryptoStashStats.Migrations.Mining
 
             modelBuilder.Entity("CryptoStashStats.Models.MiningAccountBalance", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", "Currency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CryptoStashStats.Models.MiningAccount", "MiningAccount")
                         .WithMany()
                         .HasForeignKey("MiningAccountId");
 
-                    b.Navigation("Currency");
+                    b.HasOne("CryptoStashStats.Models.Token", "Token")
+                        .WithMany()
+                        .HasForeignKey("TokenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MiningAccount");
+
+                    b.Navigation("Token");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.MiningWorker", b =>
@@ -260,17 +262,17 @@ namespace CryptoStashStats.Migrations.Mining
                     b.Navigation("MiningWorker");
                 });
 
-            modelBuilder.Entity("CurrencyMiningPool", b =>
+            modelBuilder.Entity("MiningPoolToken", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", null)
-                        .WithMany()
-                        .HasForeignKey("CurrenciesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CryptoStashStats.Models.MiningPool", null)
                         .WithMany()
                         .HasForeignKey("MiningPoolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CryptoStashStats.Models.Token", null)
+                        .WithMany()
+                        .HasForeignKey("TokensId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

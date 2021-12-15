@@ -4,27 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace CryptoStashStats.Migrations.Mining
 {
-    public partial class MiningSchema : Migration
+    public partial class AddMiningSchema : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "miningSchema");
-
-            migrationBuilder.CreateTable(
-                name: "Currencies",
-                schema: "miningSchema",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Ticker = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Currencies", x => x.Id);
-                });
 
             migrationBuilder.CreateTable(
                 name: "MiningPools",
@@ -43,30 +28,19 @@ namespace CryptoStashStats.Migrations.Mining
                 });
 
             migrationBuilder.CreateTable(
-                name: "CurrencyMiningPool",
+                name: "Tokens",
                 schema: "miningSchema",
                 columns: table => new
                 {
-                    CurrenciesId = table.Column<int>(type: "integer", nullable: false),
-                    MiningPoolsId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Ticker = table.Column<string>(type: "text", nullable: true),
+                    Address = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CurrencyMiningPool", x => new { x.CurrenciesId, x.MiningPoolsId });
-                    table.ForeignKey(
-                        name: "FK_CurrencyMiningPool_Currencies_CurrenciesId",
-                        column: x => x.CurrenciesId,
-                        principalSchema: "miningSchema",
-                        principalTable: "Currencies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CurrencyMiningPool_MiningPools_MiningPoolsId",
-                        column: x => x.MiningPoolsId,
-                        principalSchema: "miningSchema",
-                        principalTable: "MiningPools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Tokens", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -95,6 +69,33 @@ namespace CryptoStashStats.Migrations.Mining
                 });
 
             migrationBuilder.CreateTable(
+                name: "MiningPoolToken",
+                schema: "miningSchema",
+                columns: table => new
+                {
+                    MiningPoolsId = table.Column<int>(type: "integer", nullable: false),
+                    TokensId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MiningPoolToken", x => new { x.MiningPoolsId, x.TokensId });
+                    table.ForeignKey(
+                        name: "FK_MiningPoolToken_MiningPools_MiningPoolsId",
+                        column: x => x.MiningPoolsId,
+                        principalSchema: "miningSchema",
+                        principalTable: "MiningPools",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MiningPoolToken_Tokens_TokensId",
+                        column: x => x.TokensId,
+                        principalSchema: "miningSchema",
+                        principalTable: "Tokens",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MiningAccountBalances",
                 schema: "miningSchema",
                 columns: table => new
@@ -105,18 +106,11 @@ namespace CryptoStashStats.Migrations.Mining
                     Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Savings = table.Column<double>(type: "double precision", nullable: false),
-                    CurrencyId = table.Column<int>(type: "integer", nullable: false)
+                    TokenId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MiningAccountBalances", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MiningAccountBalances_Currencies_CurrencyId",
-                        column: x => x.CurrencyId,
-                        principalSchema: "miningSchema",
-                        principalTable: "Currencies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MiningAccountBalances_MiningAccounts_MiningAccountId",
                         column: x => x.MiningAccountId,
@@ -124,6 +118,13 @@ namespace CryptoStashStats.Migrations.Mining
                         principalTable: "MiningAccounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MiningAccountBalances_Tokens_TokenId",
+                        column: x => x.TokenId,
+                        principalSchema: "miningSchema",
+                        principalTable: "Tokens",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -177,29 +178,16 @@ namespace CryptoStashStats.Migrations.Mining
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Currencies_Ticker_Name",
-                schema: "miningSchema",
-                table: "Currencies",
-                columns: new[] { "Ticker", "Name" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CurrencyMiningPool_MiningPoolsId",
-                schema: "miningSchema",
-                table: "CurrencyMiningPool",
-                column: "MiningPoolsId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MiningAccountBalances_CurrencyId",
-                schema: "miningSchema",
-                table: "MiningAccountBalances",
-                column: "CurrencyId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MiningAccountBalances_MiningAccountId",
                 schema: "miningSchema",
                 table: "MiningAccountBalances",
                 column: "MiningAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MiningAccountBalances_TokenId",
+                schema: "miningSchema",
+                table: "MiningAccountBalances",
+                column: "TokenId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MiningAccounts_Identifier_Owner_MiningPoolId",
@@ -222,6 +210,12 @@ namespace CryptoStashStats.Migrations.Mining
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_MiningPoolToken_TokensId",
+                schema: "miningSchema",
+                table: "MiningPoolToken",
+                column: "TokensId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MiningWorkerHashRates_MiningWorkerId",
                 schema: "miningSchema",
                 table: "MiningWorkerHashRates",
@@ -239,16 +233,23 @@ namespace CryptoStashStats.Migrations.Mining
                 table: "MiningWorkers",
                 columns: new[] { "Name", "MiningAccountId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tokens_Name_Ticker_Address",
+                schema: "miningSchema",
+                table: "Tokens",
+                columns: new[] { "Name", "Ticker", "Address" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CurrencyMiningPool",
+                name: "MiningAccountBalances",
                 schema: "miningSchema");
 
             migrationBuilder.DropTable(
-                name: "MiningAccountBalances",
+                name: "MiningPoolToken",
                 schema: "miningSchema");
 
             migrationBuilder.DropTable(
@@ -256,7 +257,7 @@ namespace CryptoStashStats.Migrations.Mining
                 schema: "miningSchema");
 
             migrationBuilder.DropTable(
-                name: "Currencies",
+                name: "Tokens",
                 schema: "miningSchema");
 
             migrationBuilder.DropTable(

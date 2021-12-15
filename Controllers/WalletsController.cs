@@ -53,7 +53,7 @@ namespace CryptoStashStats.Controllers
         {
             var wallet = await Wallets
                 .Include(e => e.Blockchain)
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (wallet == default(Wallet))
@@ -151,17 +151,17 @@ namespace CryptoStashStats.Controllers
         // PUT: /Wallets/5/Currencies
         [HttpPut("{id}/Currencies")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutWalletCurrencies(int id, ICollection<Currency> currencies)
+        public async Task<IActionResult> PutWalletCurrencies(int id, ICollection<Token> currencies)
         {
             var wallet = await context.Wallets
                 .Include(e => e.Blockchain)
-                .ThenInclude(e => e.Currencies)
-                .Include(e => e.Currencies)
+                .ThenInclude(e => e.Tokens)
+                .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
-            wallet.Currencies = await context.Currencies
+            wallet.Tokens = await context.Tokens
                 .Where(e => currencies.Contains(e))
-                .Where(e => wallet.Blockchain.Currencies.Contains(e))
+                .Where(e => wallet.Blockchain.Tokens.Contains(e))
                 .ToListAsync();
 
             context.Entry(wallet).State = EntityState.Modified;

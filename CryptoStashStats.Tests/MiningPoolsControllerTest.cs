@@ -17,17 +17,17 @@ namespace CryptoStashStats.Tests
         public async Task PutMiningPool_DoesNotAlterCurrenciesProperty()
         {
             // Arrange
-            var currency1 = new Currency { Ticker = "eth", Name = "Ethereum" };
-            var currency2 = new Currency { Ticker = "zil", Name = "Zilliqa" };
+            var currency1 = new Token { Ticker = "eth", Name = "Ethereum" };
+            var currency2 = new Token { Ticker = "zil", Name = "Zilliqa" };
             var miningPool = new MiningPool
             {
                 Name = "My Pool",
-                Currencies = new List<Currency> { currency1 }
+                Tokens = new List<Token> { currency1 }
             };
 
             using var arrangeContext = StubContext<MiningContext>();
-            arrangeContext.Currencies.Add(currency1);
-            arrangeContext.Currencies.Add(currency2);
+            arrangeContext.Tokens.Add(currency1);
+            arrangeContext.Tokens.Add(currency2);
             arrangeContext.MiningPools.Add(miningPool);
             arrangeContext.SaveChanges();
             arrangeContext.Dispose();
@@ -41,10 +41,10 @@ namespace CryptoStashStats.Tests
                 {
                     Id = 1,
                     Name = "My Pool",
-                    Currencies = new List<Currency>
+                    Tokens = new List<Token>
                     {
-                        new Currency { Id = 1, Ticker = "eth", Name = "Zilliqa" },
-                        new Currency { Id = 2, Ticker = "zil", Name = "Zilliqa" }
+                        new Token { Id = 1, Ticker = "eth", Name = "Zilliqa" },
+                        new Token { Id = 2, Ticker = "zil", Name = "Zilliqa" }
                     }
                 }
                 );
@@ -53,14 +53,14 @@ namespace CryptoStashStats.Tests
             // Assert
             using var assertContext = StubContext<MiningContext>();
             var miningPools = await assertContext.MiningPools
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .ToListAsync();
             // Check if element currencies has 1 elements.
-            Assert.Equal(1, miningPools.Single().Currencies.Count);
+            Assert.Equal(1, miningPools.Single().Tokens.Count);
             // Check if the element is unchanged.
             Assert.Equal(
                 currency1.Name,
-                miningPools.Single().Currencies.First(e => e.Id == currency1.Id).Name
+                miningPools.Single().Tokens.First(e => e.Id == currency1.Id).Name
                 );
         }
 
@@ -68,14 +68,14 @@ namespace CryptoStashStats.Tests
         public async Task PostMiningPool_DoesNotChangeCurrency()
         {
             // Arrange
-            var original = new Currency { Ticker = "eth", Name = "Ethereum" };
+            var original = new Token { Ticker = "eth", Name = "Ethereum" };
 
             using var financeContext = StubContext<FinanceContext>();
-            financeContext.Currencies.Add(original);
+            financeContext.Tokens.Add(original);
             financeContext.SaveChanges();
 
             using var miningContext = StubContext<MiningContext>();
-            miningContext.Currencies.Add(original);
+            miningContext.Tokens.Add(original);
             miningContext.SaveChanges();
 
             // Act
@@ -86,15 +86,15 @@ namespace CryptoStashStats.Tests
                 new MiningPool
                 {
                     Name = "My Pool",
-                    Currencies = new Currency[] {
-                        new Currency { Id = 1, Ticker = "eth", Name = "Ethereum Classic" },
-                        new Currency { Ticker = "btc", Name = "Bitcoin" }
+                    Tokens = new Token[] {
+                        new Token { Id = 1, Ticker = "eth", Name = "Ethereum Classic" },
+                        new Token { Ticker = "btc", Name = "Bitcoin" }
                     }
                 }
                 );
 
-            var financeCurrencies = await financeContext2.Currencies.ToListAsync();
-            var miningCurrencies = await miningContext2.Currencies.ToListAsync();
+            var financeCurrencies = await financeContext2.Tokens.ToListAsync();
+            var miningCurrencies = await miningContext2.Tokens.ToListAsync();
 
             // Assert
             // Check if no new element were added.
@@ -114,8 +114,8 @@ namespace CryptoStashStats.Tests
                 new MiningPool
                 {
                     Name = "My Pool",
-                    Currencies = new Currency[] { 
-                        new Currency { Ticker = "eth", Name = "Ethereum" }
+                    Tokens = new Token[] { 
+                        new Token { Ticker = "eth", Name = "Ethereum" }
                     }
                 }
                 );
@@ -124,11 +124,11 @@ namespace CryptoStashStats.Tests
             // Act
             using var context2 = StubContext<MiningContext>();
             var controller = CreateControllerWithUserClaim<MiningPoolsController>(context2);
-            await controller.PutMiningPoolCurrency(1, Array.Empty<Currency>());
-            var miningPools = await context2.MiningPools.Include(e => e.Currencies).ToListAsync();
+            await controller.PutMiningPoolCurrency(1, Array.Empty<Token>());
+            var miningPools = await context2.MiningPools.Include(e => e.Tokens).ToListAsync();
 
             // Assert
-            Assert.Empty(miningPools.Single().Currencies);
+            Assert.Empty(miningPools.Single().Tokens);
         }
 
         [Fact]
@@ -140,8 +140,8 @@ namespace CryptoStashStats.Tests
                 new MiningPool
                 {
                     Name = "My Pool",
-                    Currencies = new Currency[] {
-                        new Currency { Ticker = "eth", Name = "Ethereum" }
+                    Tokens = new Token[] {
+                        new Token { Ticker = "eth", Name = "Ethereum" }
                     }
                 }
                 );
@@ -152,17 +152,17 @@ namespace CryptoStashStats.Tests
             var controller = CreateControllerWithUserClaim<MiningPoolsController>(context2);
             await controller.PutMiningPoolCurrency(
                 1,
-                new Currency[] {
-                    new Currency { Id = 1, Ticker = "eth", Name = "Bitcoin" }
+                new Token[] {
+                    new Token { Id = 1, Ticker = "eth", Name = "Bitcoin" }
                 }
                 );
 
-            var miningPools = context2.MiningPools.Include(e => e.Currencies).ToList();
-            var currencies = context2.Currencies.ToList();
+            var miningPools = context2.MiningPools.Include(e => e.Tokens).ToList();
+            var currencies = context2.Tokens.ToList();
 
             // Assert
             Assert.Single(miningPools);
-            Assert.Single(miningPools.Single().Currencies);
+            Assert.Single(miningPools.Single().Tokens);
 
             Assert.Single(currencies);
             Assert.Equal("Ethereum", currencies.Single().Name);

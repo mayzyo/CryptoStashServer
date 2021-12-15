@@ -34,12 +34,12 @@ namespace CryptoStashStats.Controllers
             )
         {
             var miningAccountBalances = currencyId == null
-                ? context.ExchangeRates.Include(e => e.BuyerCurrency)
-                : context.ExchangeRates.Where(e => e.BuyerCurrency.Id == currencyId);
+                ? context.ExchangeRates.Include(e => e.BuyerToken)
+                : context.ExchangeRates.Where(e => e.BuyerToken.Id == currencyId);
 
             return await miningAccountBalances
                 .Where(e => e.CurrencyExchange.Id == exchangeId)
-                .Include(e => e.SellerCurrency)
+                .Include(e => e.SellerToken)
                 .OrderByDescending(e => e.Created)
                 .Pagination(cursor, size)
                 .ToListAsync();
@@ -51,8 +51,8 @@ namespace CryptoStashStats.Controllers
         {
             var exchangeRate = await context.ExchangeRates
                 .Include(e => e.CurrencyExchange)
-                .Include(e => e.BuyerCurrency)
-                .Include(e => e.SellerCurrency)
+                .Include(e => e.BuyerToken)
+                .Include(e => e.SellerToken)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (exchangeRate == default(ExchangeRate) || exchangeId != exchangeRate.CurrencyExchange.Id)
@@ -117,11 +117,11 @@ namespace CryptoStashStats.Controllers
                 return BadRequest();
             }
 
-            exchangeRate.BuyerCurrency = await context.Currencies
-                .FindAsync(exchangeRate.BuyerCurrency.Id);
+            exchangeRate.BuyerToken = await context.Tokens
+                .FindAsync(exchangeRate.BuyerToken.Id);
 
-            exchangeRate.SellerCurrency = await context.Currencies
-                .FindAsync(exchangeRate.SellerCurrency.Id);
+            exchangeRate.SellerToken = await context.Tokens
+                .FindAsync(exchangeRate.SellerToken.Id);
 
             context.ExchangeRates.Add(exchangeRate);
             await context.SaveChangesAsync();

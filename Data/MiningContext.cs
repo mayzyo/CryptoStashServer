@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace CryptoStashStats.Data
 {
     // Database access in the context of mining. Anything related to mining rig and mining pools should be accessed here.
-    public class MiningContext : BaseContext, ICurrencyContext
+    public class MiningContext : BaseContext, ITokenContext
     {
-        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Token> Tokens { get; set; }
         public DbSet<MiningPool> MiningPools { get; set; }
         public DbSet<MiningAccount> MiningAccounts { get; set; }
         public DbSet<MiningAccountBalance> MiningAccountBalances { get; set; }
@@ -28,8 +28,8 @@ namespace CryptoStashStats.Data
         {
             builder.HasDefaultSchema("miningSchema");
 
-            builder.Entity<Currency>()
-                .HasIndex(e => new { e.Ticker, e.Name })
+            builder.Entity<Token>()
+                .HasIndex(e => new { e.Name, e.Ticker, e.Address })
                 .IsUnique();
 
             builder.Entity<MiningPool>()
@@ -48,8 +48,8 @@ namespace CryptoStashStats.Data
             //    .HasIndex(e => e.TXHash)
             //    .IsUnique();
 
-            builder.Entity<Currency>()  // Ignored in this context
-                .Ignore(e => e.NativeBlockchain) // Define in FinanceContext
+            builder.Entity<Token>()  // Ignored in this context
+                .Ignore(e => e.NativeBlockchain) // Defined in FinanceContext
                 .Ignore(e => e.Blockchains) // Defined in FinanceContext
                 .Ignore(e => e.ExchangeAccounts) // Defined in FinanceContext
                 .Ignore(e => e.Wallets); // Defined in FinanceContext

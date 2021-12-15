@@ -28,7 +28,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<IEnumerable<MiningPool>>> GetMiningPools()
         {
             return await context.MiningPools
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .ToListAsync();
         }
 
@@ -38,7 +38,7 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<MiningPool>> GetMiningPool(int id)
         {
             var miningPool = await context.MiningPools
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (miningPool == default(MiningPool))
@@ -108,10 +108,10 @@ namespace CryptoStashStats.Controllers
         public async Task<ActionResult<MiningPool>> PostMiningPool(MiningPool miningPool)
         {
             // Use existing Currency to avoid changes. Changes should be made using CurrencyController.
-            if (miningPool.Currencies != null)
+            if (miningPool.Tokens != null)
             {
-                miningPool.Currencies = await context.Currencies
-                    .Where(e => miningPool.Currencies.Contains(e))
+                miningPool.Tokens = await context.Tokens
+                    .Where(e => miningPool.Tokens.Contains(e))
                     .ToListAsync();
             }
 
@@ -141,13 +141,13 @@ namespace CryptoStashStats.Controllers
         // PUT: /MiningPools/5/Currencies
         [HttpPut("{id}/Currencies")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Currency> currencies)
+        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Token> currencies)
         {
             var miningPool = await context.MiningPools
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
-            miningPool.Currencies = await context.Currencies
+            miningPool.Tokens = await context.Tokens
                 .Where(e => currencies.Contains(e))
                 .ToListAsync();
 

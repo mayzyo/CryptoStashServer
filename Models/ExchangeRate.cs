@@ -9,8 +9,8 @@ namespace CryptoStashStats.Models
     public class ExchangeRate : BaseEntity
     {
         public double Current { get; set; }
-        public Currency BuyerCurrency { get; set; } // Many to One
-        public Currency SellerCurrency { get; set; } // Many to One
+        public Token BuyerToken { get; set; } // Many to One
+        public Token SellerToken { get; set; } // Many to One
         public CurrencyExchange CurrencyExchange { get; set; } // Many to One
     }
 }

@@ -29,6 +29,16 @@ namespace CryptoStashStats
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins(Configuration.GetValue<string>("AllowedHosts"))
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
             // Setup OAuth2 JWT.
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -105,29 +115,22 @@ namespace CryptoStashStats
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => 
+                app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v2/swagger.json", "CryptoStashStats v2");
+                    c.OAuthClientId("postman");
+
                     if (Configuration["SwaggerSecret"] != null)
                     {
-                        c.OAuthClientId("postman");
                         c.OAuthClientSecret(Configuration["SwaggerSecret"]);
                     }
                 });
             }
 
-            // Setup CORS policy based on environment variable.
-            var origins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "*";
-            // CORS setting with CorsPolicyBuilder.
-            app.UseCors(builder =>
-            {
-                builder
-                .WithOrigins(origins)
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-            });
+            app.UseCors();
 
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 

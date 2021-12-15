@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CryptoStashStats.Migrations
 {
     [DbContext(typeof(FinanceContext))]
-    [Migration("20211209010422_AddWalletBalancesTbl")]
-    partial class AddWalletBalancesTbl
+    [Migration("20211215010905_AddFinanceSchema")]
+    partial class AddFinanceSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -22,7 +22,22 @@ namespace CryptoStashStats.Migrations
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("CryptoStashStats.Models.Currency", b =>
+            modelBuilder.Entity("BlockchainToken", b =>
+                {
+                    b.Property<int>("BlockchainsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TokensId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BlockchainsId", "TokensId");
+
+                    b.HasIndex("TokensId");
+
+                    b.ToTable("BlockchainToken");
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.Blockchain", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,16 +48,18 @@ namespace CryptoStashStats.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Ticker")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int?>("NativeTokenId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Ticker", "Name")
+                    b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Currencies");
+                    b.HasIndex("NativeTokenId")
+                        .IsUnique();
+
+                    b.ToTable("Blockchains");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.CurrencyExchange", b =>
@@ -146,9 +163,6 @@ namespace CryptoStashStats.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("ExchangeAccountId")
                         .HasColumnType("integer");
 
@@ -158,11 +172,14 @@ namespace CryptoStashStats.Migrations
                     b.Property<double>("Savings")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("TokenId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrencyId");
-
                     b.HasIndex("ExchangeAccountId");
+
+                    b.HasIndex("TokenId");
 
                     b.ToTable("ExchangeAccountBalances");
                 });
@@ -174,7 +191,7 @@ namespace CryptoStashStats.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int?>("BuyerCurrencyId")
+                    b.Property<int?>("BuyerTokenId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Created")
@@ -189,18 +206,43 @@ namespace CryptoStashStats.Migrations
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int?>("SellerCurrencyId")
+                    b.Property<int?>("SellerTokenId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BuyerCurrencyId");
+                    b.HasIndex("BuyerTokenId");
 
                     b.HasIndex("CurrencyExchangeId");
 
-                    b.HasIndex("SellerCurrencyId");
+                    b.HasIndex("SellerTokenId");
 
                     b.ToTable("ExchangeRates");
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.Token", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ticker")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name", "Ticker", "Address")
+                        .IsUnique();
+
+                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.Wallet", b =>
@@ -214,6 +256,9 @@ namespace CryptoStashStats.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("BlockchainId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
@@ -226,7 +271,9 @@ namespace CryptoStashStats.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Address")
+                    b.HasIndex("BlockchainId");
+
+                    b.HasIndex("Address", "BlockchainId")
                         .IsUnique();
 
                     b.ToTable("Wallets");
@@ -242,55 +289,79 @@ namespace CryptoStashStats.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("Savings")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("TokenId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("WalletId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrencyId");
+                    b.HasIndex("TokenId");
 
                     b.HasIndex("WalletId");
 
                     b.ToTable("WalletBalances");
                 });
 
-            modelBuilder.Entity("CurrencyExchangeAccount", b =>
+            modelBuilder.Entity("ExchangeAccountToken", b =>
                 {
-                    b.Property<int>("CurrenciesId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ExchangeAccountsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CurrenciesId", "ExchangeAccountsId");
+                    b.Property<int>("TokensId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("ExchangeAccountsId");
+                    b.HasKey("ExchangeAccountsId", "TokensId");
 
-                    b.ToTable("CurrencyExchangeAccount");
+                    b.HasIndex("TokensId");
+
+                    b.ToTable("ExchangeAccountToken");
                 });
 
-            modelBuilder.Entity("CurrencyWallet", b =>
+            modelBuilder.Entity("TokenWallet", b =>
                 {
-                    b.Property<int>("CurrenciesId")
+                    b.Property<int>("TokensId")
                         .HasColumnType("integer");
 
                     b.Property<int>("WalletsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CurrenciesId", "WalletsId");
+                    b.HasKey("TokensId", "WalletsId");
 
                     b.HasIndex("WalletsId");
 
-                    b.ToTable("CurrencyWallet");
+                    b.ToTable("TokenWallet");
+                });
+
+            modelBuilder.Entity("BlockchainToken", b =>
+                {
+                    b.HasOne("CryptoStashStats.Models.Blockchain", null)
+                        .WithMany()
+                        .HasForeignKey("BlockchainsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CryptoStashStats.Models.Token", null)
+                        .WithMany()
+                        .HasForeignKey("TokensId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.Blockchain", b =>
+                {
+                    b.HasOne("CryptoStashStats.Models.Token", "NativeToken")
+                        .WithOne("NativeBlockchain")
+                        .HasForeignKey("CryptoStashStats.Models.Blockchain", "NativeTokenId");
+
+                    b.Navigation("NativeToken");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.ExchangeAccount", b =>
@@ -317,47 +388,58 @@ namespace CryptoStashStats.Migrations
 
             modelBuilder.Entity("CryptoStashStats.Models.ExchangeAccountBalance", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", "Currency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CryptoStashStats.Models.ExchangeAccount", "ExchangeAccount")
                         .WithMany()
                         .HasForeignKey("ExchangeAccountId");
 
-                    b.Navigation("Currency");
+                    b.HasOne("CryptoStashStats.Models.Token", "Token")
+                        .WithMany()
+                        .HasForeignKey("TokenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ExchangeAccount");
+
+                    b.Navigation("Token");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.ExchangeRate", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", "BuyerCurrency")
+                    b.HasOne("CryptoStashStats.Models.Token", "BuyerToken")
                         .WithMany()
-                        .HasForeignKey("BuyerCurrencyId");
+                        .HasForeignKey("BuyerTokenId");
 
                     b.HasOne("CryptoStashStats.Models.CurrencyExchange", "CurrencyExchange")
                         .WithMany()
                         .HasForeignKey("CurrencyExchangeId");
 
-                    b.HasOne("CryptoStashStats.Models.Currency", "SellerCurrency")
+                    b.HasOne("CryptoStashStats.Models.Token", "SellerToken")
                         .WithMany()
-                        .HasForeignKey("SellerCurrencyId");
+                        .HasForeignKey("SellerTokenId");
 
-                    b.Navigation("BuyerCurrency");
+                    b.Navigation("BuyerToken");
 
                     b.Navigation("CurrencyExchange");
 
-                    b.Navigation("SellerCurrency");
+                    b.Navigation("SellerToken");
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.Wallet", b =>
+                {
+                    b.HasOne("CryptoStashStats.Models.Blockchain", "Blockchain")
+                        .WithMany("Wallets")
+                        .HasForeignKey("BlockchainId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blockchain");
                 });
 
             modelBuilder.Entity("CryptoStashStats.Models.WalletBalance", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", "Currency")
+                    b.HasOne("CryptoStashStats.Models.Token", "Token")
                         .WithMany()
-                        .HasForeignKey("CurrencyId")
+                        .HasForeignKey("TokenId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -365,31 +447,31 @@ namespace CryptoStashStats.Migrations
                         .WithMany()
                         .HasForeignKey("WalletId");
 
-                    b.Navigation("Currency");
+                    b.Navigation("Token");
 
                     b.Navigation("Wallet");
                 });
 
-            modelBuilder.Entity("CurrencyExchangeAccount", b =>
+            modelBuilder.Entity("ExchangeAccountToken", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", null)
-                        .WithMany()
-                        .HasForeignKey("CurrenciesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CryptoStashStats.Models.ExchangeAccount", null)
                         .WithMany()
                         .HasForeignKey("ExchangeAccountsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("CryptoStashStats.Models.Token", null)
+                        .WithMany()
+                        .HasForeignKey("TokensId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("CurrencyWallet", b =>
+            modelBuilder.Entity("TokenWallet", b =>
                 {
-                    b.HasOne("CryptoStashStats.Models.Currency", null)
+                    b.HasOne("CryptoStashStats.Models.Token", null)
                         .WithMany()
-                        .HasForeignKey("CurrenciesId")
+                        .HasForeignKey("TokensId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -400,10 +482,20 @@ namespace CryptoStashStats.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CryptoStashStats.Models.Blockchain", b =>
+                {
+                    b.Navigation("Wallets");
+                });
+
             modelBuilder.Entity("CryptoStashStats.Models.ExchangeAccount", b =>
                 {
                     b.Navigation("ExchangeAccountApiKey")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CryptoStashStats.Models.Token", b =>
+                {
+                    b.Navigation("NativeBlockchain");
                 });
 #pragma warning restore 612, 618
         }

@@ -49,8 +49,8 @@ namespace CryptoStashStats.Controllers
             )
         {
             var exchangeAccountBalances = currencyId == null
-                ? ExchangeAccountBalances.Include(e => e.Currency)
-                : ExchangeAccountBalances.Where(e => e.Currency.Id == currencyId);
+                ? ExchangeAccountBalances.Include(e => e.Token)
+                : ExchangeAccountBalances.Where(e => e.Token.Id == currencyId);
 
             return await exchangeAccountBalances
                 .Where(e => e.ExchangeAccount.Id == accountId)
@@ -122,29 +122,29 @@ namespace CryptoStashStats.Controllers
 
             // Get existing account from database.
             exchangeAccountBalance.ExchangeAccount = await context.ExchangeAccounts
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == exchangeAccountBalance.ExchangeAccount.Id);
 
             // Get existing currency from database.
-            exchangeAccountBalance.Currency = await context.Currencies
-                .FindAsync(exchangeAccountBalance.Currency.Id);
+            exchangeAccountBalance.Token = await context.Tokens
+                .FindAsync(exchangeAccountBalance.Token.Id);
 
             if (exchangeAccountBalance.ExchangeAccount == null)
             {
                 return BadRequest("Associated exchange account not found");
             }
-            else if (exchangeAccountBalance.Currency == null)
+            else if (exchangeAccountBalance.Token == null)
             {
                 return BadRequest("Associated currency doesn't exist");
             }
 
-            if (exchangeAccountBalance.ExchangeAccount.Currencies == null)
+            if (exchangeAccountBalance.ExchangeAccount.Tokens == null)
             {
-                exchangeAccountBalance.ExchangeAccount.Currencies = new List<Currency> { exchangeAccountBalance.Currency };
+                exchangeAccountBalance.ExchangeAccount.Tokens = new List<Token> { exchangeAccountBalance.Token };
             }
-            else if (!exchangeAccountBalance.ExchangeAccount.Currencies.Contains(exchangeAccountBalance.Currency))
+            else if (!exchangeAccountBalance.ExchangeAccount.Tokens.Contains(exchangeAccountBalance.Token))
             {
-                exchangeAccountBalance.ExchangeAccount.Currencies.Add(exchangeAccountBalance.Currency);
+                exchangeAccountBalance.ExchangeAccount.Tokens.Add(exchangeAccountBalance.Token);
             }
 
             context.ExchangeAccountBalances.Add(exchangeAccountBalance);

@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace CryptoStashStats.Data
 {
     // Database access in the context of mining. Anything related to mining rig and mining pools should be accessed here.
-    public class FinanceContext : BaseContext, ICurrencyContext
+    public class FinanceContext : BaseContext, ITokenContext
     {
-        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Token> Tokens { get; set; }
         public DbSet<Blockchain> Blockchains { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<WalletBalance> WalletBalances { get; set; }
@@ -31,15 +31,23 @@ namespace CryptoStashStats.Data
             builder.HasDefaultSchema("financeSchema");
 
             builder.Entity<Blockchain>()
-                .HasOne(e => e.NativeCurrency)
-                .WithOne(e => e.NativeBlockchain);
+                .HasOne(e => e.NativeToken)
+                .WithOne(e => e.NativeBlockchain);                
 
-            builder.Entity<Currency>()
-                .HasIndex(e => new { e.Ticker, e.Name })
+            //builder.Entity<Blockchain>()
+            //    .HasMany(e => e.Tokens)
+            //    .WithMany(e => e.Blockchains);
+
+            builder.Entity<Token>()
+                .HasIndex(e => new { e.Name, e.Ticker, e.Address })
                 .IsUnique();
 
             builder.Entity<Blockchain>()
                 .HasIndex(e => e.Name)
+                .IsUnique();
+
+            builder.Entity<Blockchain>()
+                .HasIndex(e => e.NativeTokenId)
                 .IsUnique();
 
             builder.Entity<Wallet>()
@@ -58,7 +66,7 @@ namespace CryptoStashStats.Data
                 .HasIndex(e => new { e.PublicKey, e.PrivateKey })
                 .IsUnique();
 
-            builder.Entity<Currency>()  // Ignored in this context
+            builder.Entity<Token>()  // Ignored in this context
                 .Ignore(e => e.MiningPools); // Defined in MiningContext
         }
     }

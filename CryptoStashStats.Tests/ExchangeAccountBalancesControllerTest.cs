@@ -18,7 +18,7 @@ namespace CryptoStashStats.Tests
         public async Task PostExchangeAccountBalance_DoesAddCurrencyToAccount()
         {
             // Arrange
-            var currency = new Currency { Name = "ETHEREUM", Ticker = "ETH" };
+            var currency = new Token { Name = "ETHEREUM", Ticker = "ETH" };
             var currencyExchange = new CurrencyExchange { Name = "BINANCE" };
             var exchangeAccount = new ExchangeAccount
             {
@@ -28,7 +28,7 @@ namespace CryptoStashStats.Tests
             };
 
             using var arrangeContext = StubContext<FinanceContext>();
-            arrangeContext.Currencies.Add(currency);
+            arrangeContext.Tokens.Add(currency);
             arrangeContext.CurrencyExchanges.Add(currencyExchange);
             arrangeContext.ExchangeAccounts.Add(exchangeAccount);
             arrangeContext.SaveChanges();
@@ -43,7 +43,7 @@ namespace CryptoStashStats.Tests
                 {
                     ExchangeAccount = exchangeAccount,
                     Savings = 1000,
-                    Currency = currency
+                    Token = currency
                 }
                 );
 
@@ -51,11 +51,11 @@ namespace CryptoStashStats.Tests
             using var assertContext = StubContext<FinanceContext>();
             var exchangeAccountModel = Assert.Single(
                 await assertContext.ExchangeAccounts
-                    .Include(e => e.Currencies)
+                    .Include(e => e.Tokens)
                     .ToListAsync()
                 );
-            Assert.NotNull(exchangeAccountModel.Currencies);
-            var model = Assert.Single(exchangeAccountModel.Currencies);
+            Assert.NotNull(exchangeAccountModel.Tokens);
+            var model = Assert.Single(exchangeAccountModel.Tokens);
             Assert.Equal(model.Id, currency.Id);
         }
     }

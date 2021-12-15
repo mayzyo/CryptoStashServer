@@ -50,11 +50,11 @@ namespace CryptoStashStats.Controllers
         {
             var miningAccountBalances = currencyId == null 
                 ? MiningAccountBalances 
-                : MiningAccountBalances.Where(e => e.Currency.Id == currencyId);
+                : MiningAccountBalances.Where(e => e.Token.Id == currencyId);
 
             return await miningAccountBalances
                 .Where(e => e.MiningAccount.Id == accountId)
-                .Include(e => e.Currency)
+                .Include(e => e.Token)
                 .OrderByDescending(e => e.Created)
                 .Pagination(cursor, size)
                 .ToListAsync();
@@ -126,14 +126,14 @@ namespace CryptoStashStats.Controllers
                 .FindAsync(miningAccountBalance.MiningAccount.Id);
 
             // Get existing currency from database.
-            miningAccountBalance.Currency = await context.Currencies
-                .FindAsync(miningAccountBalance.Currency.Id);
+            miningAccountBalance.Token = await context.Tokens
+                .FindAsync(miningAccountBalance.Token.Id);
 
             if (miningAccountBalance.MiningAccount == null)
             {
                 return BadRequest("Associated mining pool account not found");
             }
-            else if (miningAccountBalance.Currency == null)
+            else if (miningAccountBalance.Token == null)
             {
                 return BadRequest("Associated currency doesn't exist");
             }

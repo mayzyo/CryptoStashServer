@@ -17,23 +17,23 @@ namespace CryptoStashStats.Tests
         public async Task PutWalletCurrencies_DoesNotChangeBlockchainCurrency()
         {
             // Arrange
-            var currency1 = new Currency { Ticker = "ETH", Name = "ETHER" };
-            var currency2 = new Currency { Ticker = "MATIC", Name = "POLYGON" };
+            var currency1 = new Token { Ticker = "ETH", Name = "ETHER" };
+            var currency2 = new Token { Ticker = "MATIC", Name = "POLYGON" };
             var blockchain = new Blockchain
             {
                 Name = "ETHEREUM",
-                NativeCurrency = currency1,
-                Currencies = new List<Currency> { currency1 }
+                NativeToken = currency1,
+                Tokens = new List<Token> { currency1 }
             };
             var wallet = new Wallet
             {
                 Address = "abcd",
-                Currencies = new List<Currency> { currency1 },
+                Tokens = new List<Token> { currency1 },
                 Blockchain = blockchain
             };
             using var arrangeContext = StubContext<FinanceContext>();
-            arrangeContext.Currencies.Add(currency1);
-            arrangeContext.Currencies.Add(currency2);
+            arrangeContext.Tokens.Add(currency1);
+            arrangeContext.Tokens.Add(currency2);
             arrangeContext.Blockchains.Add(blockchain);
             arrangeContext.Wallets.Add(wallet);
             arrangeContext.SaveChanges();
@@ -44,9 +44,9 @@ namespace CryptoStashStats.Tests
             var controller = CreateControllerWithUserClaim<WalletsController>(actContext);
             await controller.PutWalletCurrencies(
                 wallet.Id,
-                new List<Currency> { 
-                    new Currency { Id = currency1.Id, Ticker = "ETHEREUM", Name = "POLYGON" },
-                    new Currency { Ticker = "MATIC", Name = "POLYGON" }
+                new List<Token> { 
+                    new Token { Id = currency1.Id, Ticker = "ETHEREUM", Name = "POLYGON" },
+                    new Token { Ticker = "MATIC", Name = "POLYGON" }
                 }
                 );
             actContext.Dispose();
@@ -54,9 +54,9 @@ namespace CryptoStashStats.Tests
             // Assert
             using var assertContext = StubContext<FinanceContext>();
             var walletModel = await assertContext.Wallets
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync();
-            var model = Assert.Single(walletModel.Currencies);
+            var model = Assert.Single(walletModel.Tokens);
             Assert.Equal(model.Name, currency1.Name);
         }
     }

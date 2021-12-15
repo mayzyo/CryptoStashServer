@@ -11,33 +11,33 @@ using Xunit;
 
 namespace CryptoStashStats.Tests
 {
-    public class CurrenciesControllerTest : EntityControllerTest
+    public class TokensControllerTest : EntityControllerTest
     {
         [Fact]
         public async Task GetCurrencies_ReturnsSingleValueFromMultipleContext()
         {
             // Arrange
             using var financeContext = StubContext<FinanceContext>();
-            financeContext.Currencies.Add(
-                new Currency { Ticker = "eth", Name = "Ethereum" }
+            financeContext.Tokens.Add(
+                new Token { Ticker = "eth", Name = "Ethereum" }
                 );
             financeContext.SaveChanges();
 
             using var miningContext = StubContext<MiningContext>();
-            miningContext.Currencies.Add(
-                new Currency { Ticker = "eth", Name = "Ethereum" }
+            miningContext.Tokens.Add(
+                new Token { Ticker = "eth", Name = "Ethereum" }
                 );
             miningContext.SaveChanges();
 
             // Act
             using var financeContext2 = StubContext<FinanceContext>();
             using var miningContext2 = StubContext<MiningContext>();
-            var controller = new CurrenciesController(financeContext2, miningContext2);
-            var result = await controller.GetCurrencies();
+            var controller = new TokensController(financeContext2, miningContext2);
+            var result = await controller.GetTokens();
 
             // Assert
-            var viewResult = Assert.IsType<ActionResult<IEnumerable<Currency>>>(result);
-            var model = Assert.IsAssignableFrom<List<Currency>>(viewResult.Value);
+            var viewResult = Assert.IsType<ActionResult<IEnumerable<Token>>>(result);
+            var model = Assert.IsAssignableFrom<List<Token>>(viewResult.Value);
             Assert.Single(model);
         }
 
@@ -49,16 +49,16 @@ namespace CryptoStashStats.Tests
             using var miningContext = StubContext<MiningContext>();
 
             // Act
-            var controller = new CurrenciesController(financeContext, miningContext);
-            await controller.PostCurrency(
-                new Currency { Ticker = "eth", Name = "Ethereum" }
+            var controller = new TokensController(financeContext, miningContext);
+            await controller.PostToken(
+                new Token { Ticker = "eth", Name = "Ethereum" }
                 );
-            var financeCurrency = await financeContext.Currencies.FirstAsync();
-            var miningCurrency = await miningContext.Currencies.FirstAsync();
+            var financeToken = await financeContext.Tokens.FirstAsync();
+            var miningToken = await miningContext.Tokens.FirstAsync();
 
             // Assert
-            var financeModel = Assert.IsAssignableFrom<Currency>(financeCurrency);
-            var miningModel = Assert.IsAssignableFrom<Currency>(miningCurrency);
+            var financeModel = Assert.IsAssignableFrom<Token>(financeToken);
+            var miningModel = Assert.IsAssignableFrom<Token>(miningToken);
             Assert.Equal(financeModel, miningModel);
         }
 
@@ -67,14 +67,14 @@ namespace CryptoStashStats.Tests
         {
             // Arrange
             using var arrangeFContext = StubContext<FinanceContext>();
-            arrangeFContext.Currencies.Add(
-                new Currency { Ticker = "eth", Name = "Ethereum" }
+            arrangeFContext.Tokens.Add(
+                new Token { Ticker = "eth", Name = "Ethereum" }
                 );
             arrangeFContext.SaveChanges();
 
             using var arrangeMContext = StubContext<MiningContext>();
-            arrangeMContext.Currencies.Add(
-                new Currency { Ticker = "eth", Name = "Ethereum" }
+            arrangeMContext.Tokens.Add(
+                new Token { Ticker = "eth", Name = "Ethereum" }
                 );
             arrangeMContext.SaveChanges();
 
@@ -84,8 +84,8 @@ namespace CryptoStashStats.Tests
             // Act
             using var actFContext = StubContext<FinanceContext>();
             using var actMContext = StubContext<MiningContext>();
-            var controller = CreateControllerWithUserClaim<CurrenciesController>(actFContext, actMContext);
-            await controller.DeleteCurrency(1);
+            var controller = CreateControllerWithUserClaim<TokensController>(actFContext, actMContext);
+            await controller.DeleteToken(1);
 
             actFContext.Dispose();
             actMContext.Dispose();
@@ -93,8 +93,8 @@ namespace CryptoStashStats.Tests
             // Assert
             using var assertFContext = StubContext<FinanceContext>();
             using var assertMContext = StubContext<MiningContext>();
-            var financeResult = await assertFContext.Currencies.AnyAsync();
-            var miningResult = await assertMContext.Currencies.AnyAsync();
+            var financeResult = await assertFContext.Tokens.AnyAsync();
+            var miningResult = await assertMContext.Tokens.AnyAsync();
             Assert.False(financeResult);
             Assert.False(miningResult);
         }

@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace CryptoStashStats.Data
 {
-    public interface ICurrencyContext
+    public interface ITokenContext
     {
-        DbSet<Currency> Currencies { get; set; }
+        DbSet<Token> Tokens { get; set; }
     }
 }

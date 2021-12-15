@@ -49,8 +49,8 @@ namespace CryptoStashStats.Controllers
             )
         {
             var walletBalances = currencyId == null
-                ? WalletBalances.Include(e => e.Currency)
-                : WalletBalances.Where(e => e.Currency.Id == currencyId);
+                ? WalletBalances.Include(e => e.Token)
+                : WalletBalances.Where(e => e.Token.Id == currencyId);
 
             return await walletBalances
                 .Where(e => e.Wallet.Id == walletId)
@@ -123,41 +123,41 @@ namespace CryptoStashStats.Controllers
             // Get existing account from database.
             walletBalance.Wallet = await context.Wallets
                 .Include(e => e.Blockchain)
-                .Include(e => e.Currencies)
+                .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == walletBalance.Wallet.Id);
 
             if (walletBalance.Wallet == null)
             {
                 return BadRequest("Associated wallet not found");
             }
-            else if (walletBalance.Currency == null)
+            else if (walletBalance.Token == null)
             {
                 return BadRequest("Associated currency doesn't exist");
             }
 
             // Get existing currency from database.
-            walletBalance.Currency = await context.Currencies
-                .FindAsync(walletBalance.Currency.Id);
+            walletBalance.Token = await context.Tokens
+                .FindAsync(walletBalance.Token.Id);
 
-            if (walletBalance.Wallet.Currencies == null)
+            if (walletBalance.Wallet.Tokens == null)
             {
-                walletBalance.Wallet.Currencies = new List<Currency> { walletBalance.Currency };
+                walletBalance.Wallet.Tokens = new List<Token> { walletBalance.Token };
             }
-            else if (!walletBalance.Wallet.Currencies.Contains(walletBalance.Currency))
+            else if (!walletBalance.Wallet.Tokens.Contains(walletBalance.Token))
             {
-                walletBalance.Wallet.Currencies.Add(walletBalance.Currency);
+                walletBalance.Wallet.Tokens.Add(walletBalance.Token);
             }
 
             // Add new currencies to existing currencies in blockchain
-            if (walletBalance.Wallet.Blockchain.Currencies != null)
+            if (walletBalance.Wallet.Blockchain.Tokens != null)
             {
-                walletBalance.Wallet.Blockchain.Currencies = walletBalance.Wallet.Blockchain.Currencies
-                    .Union(walletBalance.Wallet.Currencies)
+                walletBalance.Wallet.Blockchain.Tokens = walletBalance.Wallet.Blockchain.Tokens
+                    .Union(walletBalance.Wallet.Tokens)
                     .ToList();
             }
             else // Set currencies as blockchain's currencies
             {
-                walletBalance.Wallet.Blockchain.Currencies = walletBalance.Wallet.Currencies;
+                walletBalance.Wallet.Blockchain.Tokens = walletBalance.Wallet.Tokens;
             }
 
             context.WalletBalances.Add(walletBalance);
