@@ -118,11 +118,11 @@ namespace CryptoStashStats
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v2/swagger.json", "CryptoStashStats v2");
-                    c.OAuthClientId("postman");
+                    c.OAuthClientId("development");
 
-                    if (Configuration["SwaggerSecret"] != null)
+                    if (Configuration["DevelopmentSecret"] != null)
                     {
-                        c.OAuthClientSecret(Configuration["SwaggerSecret"]);
+                        c.OAuthClientSecret(Configuration["DevelopmentSecret"]);
                     }
                 });
             }

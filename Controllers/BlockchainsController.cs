@@ -127,17 +127,17 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /Blockchains/5/Currencies
-        [HttpPut("{id}/Currencies")]
+        // PUT: /Blockchains/5/Tokens
+        [HttpPut("{id}/Tokens")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutBlockchainCurrencies(int id, ICollection<Token> currencies)
+        public async Task<IActionResult> PutBlockchainTokens(int id, ICollection<Token> tokens)
         {
             var blockchain = await context.Blockchains
                 .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
             blockchain.Tokens = await context.Tokens
-                .Where(e => currencies.Contains(e))
+                .Where(e => tokens.Contains(e))
                 .ToListAsync();
 
             context.Entry(blockchain).State = EntityState.Modified;
@@ -159,6 +159,23 @@ namespace CryptoStashStats.Controllers
             }
 
             return NoContent();
+        }
+
+        // GET /Blockchains/5/Wallets
+        [HttpGet("{id}/Wallets")]
+        [Authorize("manage_access")]
+        public async Task<ActionResult<IEnumerable<Wallet>>> GetBlockchainWallets(int id, int cursor = -1, int size = 10)
+        {
+            if (!BlockchainExists(id))
+            {
+                return NotFound();
+            }
+
+            return await context.Wallets
+                .Where(e => e.Blockchain.Id == id)
+                .OrderByDescending(e => e.Created)
+                .Pagination(cursor, size)
+                .ToListAsync();
         }
 
         private bool BlockchainExists(int id)

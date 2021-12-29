@@ -138,17 +138,17 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /MiningPools/5/Currencies
-        [HttpPut("{id}/Currencies")]
+        // PUT: /MiningPools/5/Tokens
+        [HttpPut("{id}/Tokens")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Token> currencies)
+        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Token> tokens)
         {
             var miningPool = await context.MiningPools
                 .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
             miningPool.Tokens = await context.Tokens
-                .Where(e => currencies.Contains(e))
+                .Where(e => tokens.Contains(e))
                 .ToListAsync();
 
             context.Entry(miningPool).State = EntityState.Modified;

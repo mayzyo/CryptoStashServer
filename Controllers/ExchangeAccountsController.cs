@@ -234,17 +234,17 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /ExchangeAccounts/5/Currencies
-        [HttpPut("{id}/Currencies")]
+        // PUT: /ExchangeAccounts/5/Tokens
+        [HttpPut("{id}/Tokens")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutExchangeAccountCurrencies(int id, ICollection<Token> currencies)
+        public async Task<IActionResult> PutExchangeAccountCurrencies(int id, ICollection<Token> tokens)
         {
             var exchangeAccount = await context.ExchangeAccounts
                 .Include(e => e.Tokens)
                 .FirstAsync(e => e.Id == id);
 
             exchangeAccount.Tokens = await context.Tokens
-                .Where(e => currencies.Contains(e))
+                .Where(e => tokens.Contains(e))
                 .ToListAsync();
 
             context.Entry(exchangeAccount).State = EntityState.Modified;

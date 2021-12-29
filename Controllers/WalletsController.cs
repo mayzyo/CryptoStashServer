@@ -148,10 +148,10 @@ namespace CryptoStashStats.Controllers
             return NoContent();
         }
 
-        // PUT: /Wallets/5/Currencies
-        [HttpPut("{id}/Currencies")]
+        // PUT: /Wallets/5/Tokens
+        [HttpPut("{id}/Tokens")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutWalletCurrencies(int id, ICollection<Token> currencies)
+        public async Task<IActionResult> PutWalletCurrencies(int id, ICollection<Token> tokens)
         {
             var wallet = await context.Wallets
                 .Include(e => e.Blockchain)
@@ -160,7 +160,7 @@ namespace CryptoStashStats.Controllers
                 .FirstAsync(e => e.Id == id);
 
             wallet.Tokens = await context.Tokens
-                .Where(e => currencies.Contains(e))
+                .Where(e => tokens.Contains(e))
                 .Where(e => wallet.Blockchain.Tokens.Contains(e))
                 .ToListAsync();
 

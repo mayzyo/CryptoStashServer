@@ -43,14 +43,14 @@ namespace CryptoStashStats.Controllers
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<MiningAccountBalance>>> GetMiningAccountBalances(
             int accountId,
-            int? currencyId,
+            int? tokenId,
             int cursor = -1,
             int size = 10
             )
         {
-            var miningAccountBalances = currencyId == null 
+            var miningAccountBalances = tokenId == null 
                 ? MiningAccountBalances 
-                : MiningAccountBalances.Where(e => e.Token.Id == currencyId);
+                : MiningAccountBalances.Where(e => e.Token.Id == tokenId);
 
             return await miningAccountBalances
                 .Where(e => e.MiningAccount.Id == accountId)
@@ -125,7 +125,7 @@ namespace CryptoStashStats.Controllers
             miningAccountBalance.MiningAccount = await context.MiningAccounts
                 .FindAsync(miningAccountBalance.MiningAccount.Id);
 
-            // Get existing currency from database.
+            // Get existing token from database.
             miningAccountBalance.Token = await context.Tokens
                 .FindAsync(miningAccountBalance.Token.Id);
 
@@ -135,7 +135,7 @@ namespace CryptoStashStats.Controllers
             }
             else if (miningAccountBalance.Token == null)
             {
-                return BadRequest("Associated currency doesn't exist");
+                return BadRequest("Associated token doesn't exist");
             }
 
             context.MiningAccountBalances.Add(miningAccountBalance);
