@@ -38,19 +38,19 @@ namespace CryptoStashStats.Controllers
             this.context = context;
         }
 
-        // GET: /Wallets/5/Balances?currencyId=&cursor=&size=
+        // GET: /Wallets/5/Balances?tokenId=&cursor=&size=
         [HttpGet]
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<WalletBalance>>> GetWalletBalances(
             int walletId,
-            int? currencyId,
+            int? tokenId,
             int cursor = -1,
             int size = 10
             )
         {
-            var walletBalances = currencyId == null
+            var walletBalances = tokenId == null
                 ? WalletBalances.Include(e => e.Token)
-                : WalletBalances.Where(e => e.Token.Id == currencyId);
+                : WalletBalances.Where(e => e.Token.Id == tokenId);
 
             return await walletBalances
                 .Where(e => e.Wallet.Id == walletId)

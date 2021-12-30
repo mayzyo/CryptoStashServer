@@ -141,7 +141,7 @@ namespace CryptoStashStats.Controllers
         // PUT: /MiningPools/5/Tokens
         [HttpPut("{id}/Tokens")]
         [Authorize("manage_access")]
-        public async Task<IActionResult> PutMiningPoolCurrency(int id, ICollection<Token> tokens)
+        public async Task<IActionResult> PutMiningPoolTokens(int id, ICollection<Token> tokens)
         {
             var miningPool = await context.MiningPools
                 .Include(e => e.Tokens)

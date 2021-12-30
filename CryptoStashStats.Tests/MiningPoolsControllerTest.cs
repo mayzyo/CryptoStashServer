@@ -14,7 +14,7 @@ namespace CryptoStashStats.Tests
     public class MiningPoolsControllerTest : EntityControllerTest
     {
         [Fact]
-        public async Task PutMiningPool_DoesNotAlterCurrenciesProperty()
+        public async Task PutMiningPool_DoesNotAlterTokensProperty()
         {
             // Arrange
             var currency1 = new Token { Ticker = "eth", Name = "Ethereum" };
@@ -65,7 +65,7 @@ namespace CryptoStashStats.Tests
         }
 
         [Fact]
-        public async Task PostMiningPool_DoesNotChangeCurrency()
+        public async Task PostMiningPool_DoesNotChangeToken()
         {
             // Arrange
             var original = new Token { Ticker = "eth", Name = "Ethereum" };
@@ -106,7 +106,7 @@ namespace CryptoStashStats.Tests
         }
 
         [Fact]
-        public async Task PutMiningPoolCurrency_DoesRemoveRelationship()
+        public async Task PutMiningPoolToken_DoesRemoveRelationship()
         {
             // Arrange
             using var context = StubContext<MiningContext>();
@@ -124,7 +124,7 @@ namespace CryptoStashStats.Tests
             // Act
             using var context2 = StubContext<MiningContext>();
             var controller = CreateControllerWithUserClaim<MiningPoolsController>(context2);
-            await controller.PutMiningPoolCurrency(1, Array.Empty<Token>());
+            await controller.PutMiningPoolTokens(1, Array.Empty<Token>());
             var miningPools = await context2.MiningPools.Include(e => e.Tokens).ToListAsync();
 
             // Assert
@@ -132,7 +132,7 @@ namespace CryptoStashStats.Tests
         }
 
         [Fact]
-        public async Task PutMiningPoolCurrency_DoesNotChangeCurrency()
+        public async Task PutMiningPoolToken_DoesNotChangeCurrency()
         {
             // Arrange
             using var context = StubContext<MiningContext>();
@@ -150,7 +150,7 @@ namespace CryptoStashStats.Tests
             // Act
             using var context2 = StubContext<MiningContext>();
             var controller = CreateControllerWithUserClaim<MiningPoolsController>(context2);
-            await controller.PutMiningPoolCurrency(
+            await controller.PutMiningPoolTokens(
                 1,
                 new Token[] {
                     new Token { Id = 1, Ticker = "eth", Name = "Bitcoin" }

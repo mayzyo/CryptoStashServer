@@ -38,7 +38,7 @@ namespace CryptoStashStats.Controllers
             this.context = context;
         }
 
-        // GET: /MiningAccounts/5/Balances?ticker=&cursor=&size=
+        // GET: /MiningAccounts/5/Balances?tokenId=&cursor=&size=
         [HttpGet]
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<MiningAccountBalance>>> GetMiningAccountBalances(
