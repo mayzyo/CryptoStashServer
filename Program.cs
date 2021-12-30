@@ -21,6 +21,10 @@ namespace CryptoStashStats
                 {
                     Console.WriteLine("Attempt to populate database with migrations...");
                     Migrate.EnsureMigration(host.Services.GetRequiredService<IConfiguration>());
+                } else if(Environment.GetEnvironmentVariable("SEED") != null)
+                {
+                    Console.WriteLine("Attempt to populate database with seed data...");
+                    SeedData.EnsureSeedData(host.Services.GetRequiredService<IConfiguration>());
                 }
 
                 Console.WriteLine("Starting host...");
