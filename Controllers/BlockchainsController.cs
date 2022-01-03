@@ -14,7 +14,6 @@ namespace CryptoStashStats.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize("finance_audience")]
     public class BlockchainsController : ControllerBase
     {
         private readonly FinanceContext context;
