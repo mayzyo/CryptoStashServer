@@ -22,6 +22,7 @@ namespace CryptoStashServer.Tests
             var apiKey = new ExchangeAccountApiKey { PublicKey = "abcd", PrivateKey = "1234" };
             var exchangeAccount = new ExchangeAccount
             {
+                Name = "Account Test",
                 Owner = "user1",
                 CurrencyExchange = currencyExchange,
                 ExchangeAccountApiKey = apiKey
@@ -81,6 +82,7 @@ namespace CryptoStashServer.Tests
             // Act
             await controller.PostExchangeAccount(
                 new ExchangeAccount {
+                    Name = "Account Test",
                     Owner = "user1",
                     CurrencyExchange = currencyExchange,
                     ExchangeAccountApiKey = apiKey
@@ -99,6 +101,7 @@ namespace CryptoStashServer.Tests
             var currencyExchange = new CurrencyExchange { Name = "BINANCE" };
             var exchangeAccount = new ExchangeAccount
             {
+                Name = "Account Test",
                 Owner = "user1",
                 CurrencyExchange = currencyExchange,
                 ExchangeAccountApiKey = new ExchangeAccountApiKey { PublicKey = "abcd", PrivateKey = "1234" }
@@ -126,6 +129,7 @@ namespace CryptoStashServer.Tests
             var currencyExchange = new CurrencyExchange { Name = "BINANCE" };
             var exchangeAccount = new ExchangeAccount
             {
+                Name = "Account Test",
                 Owner = "user1",
                 CurrencyExchange = currencyExchange,
                 ExchangeAccountApiKey = new ExchangeAccountApiKey { PublicKey = "abcd", PrivateKey = "1234" }

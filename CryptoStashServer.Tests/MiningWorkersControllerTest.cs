@@ -18,7 +18,7 @@ namespace CryptoStashServer.Tests
         public async Task PutMiningWorker_DoesNotChangeMiningAccount()
         {
             // Arrange
-            var original = new MiningAccount { Id = 1, Identifier = "account1" };
+            var original = new MiningAccount { Id = 1, Identifier = "account1", Owner = "user1" };
             using var context = StubContext<MiningContext>();
             context.MiningWorkers.Add(
                 new MiningWorker
@@ -54,7 +54,7 @@ namespace CryptoStashServer.Tests
         public async Task PostMiningWorker_DoesNotChangeMiningAccount()
         {
             // Arrange
-            var original = new MiningAccount { Id = 1, Identifier = "account1" };
+            var original = new MiningAccount { Id = 1, Identifier = "account1", Owner = "user1" };
             using var context = StubContext<MiningContext>();
             context.MiningAccounts.Add(original);
             context.SaveChanges();

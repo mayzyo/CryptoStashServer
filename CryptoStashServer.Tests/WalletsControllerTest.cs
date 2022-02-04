@@ -27,6 +27,7 @@ namespace CryptoStashServer.Tests
             };
             var wallet = new Wallet
             {
+                Owner = "user1",
                 Address = "abcd",
                 Tokens = new List<Token> { currency1 },
                 Blockchain = blockchain

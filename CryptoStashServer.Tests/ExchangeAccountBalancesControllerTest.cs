@@ -22,6 +22,7 @@ namespace CryptoStashServer.Tests
             var currencyExchange = new CurrencyExchange { Name = "BINANCE" };
             var exchangeAccount = new ExchangeAccount
             {
+                Name = "Account Test",
                 Owner = "user1",
                 CurrencyExchange = currencyExchange,
                 ExchangeAccountApiKey = new ExchangeAccountApiKey { PublicKey = "abcd", PrivateKey = "1234" }
