@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats.Utilities
+namespace CryptoStashServer.Utilities
 {
     public interface IBaseEntity
     {

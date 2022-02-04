@@ -8,16 +8,16 @@ ENV ALLOWED_ORIGINS=""
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /src
-COPY ["CryptoStashStats.csproj", "."]
-RUN dotnet restore "./CryptoStashStats.csproj"
+COPY ["CryptoStashServer.csproj", "."]
+RUN dotnet restore "./CryptoStashServer.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "CryptoStashStats.csproj" -c Release -o /app/build
+RUN dotnet build "CryptoStashServer.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "CryptoStashStats.csproj" -c Release -o /app/publish
+RUN dotnet publish "CryptoStashServer.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "CryptoStashStats.dll"]
+ENTRYPOINT ["dotnet", "CryptoStashServer.dll"]

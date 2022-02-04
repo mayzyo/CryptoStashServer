@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CryptoStashStats.Utilities;
+using CryptoStashServer.Utilities;
 
-namespace CryptoStashStats.Controllers
+namespace CryptoStashServer.Controllers
 {
     public static class Extensions
     {

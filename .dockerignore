@@ -25,4 +25,4 @@ kubernetes.yaml
 openapi.json
 LICENSE
 README.md
-/CryptoStashStats.Tests
+/CryptoStashServer.Tests

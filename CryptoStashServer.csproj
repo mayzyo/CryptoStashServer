@@ -11,9 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CryptoStashServer.Tests\**" />
     <Compile Remove="CryptoStashStats.Tests\**" />
+    <Content Remove="CryptoStashServer.Tests\**" />
     <Content Remove="CryptoStashStats.Tests\**" />
+    <EmbeddedResource Remove="CryptoStashServer.Tests\**" />
     <EmbeddedResource Remove="CryptoStashStats.Tests\**" />
+    <None Remove="CryptoStashServer.Tests\**" />
     <None Remove="CryptoStashStats.Tests\**" />
   </ItemGroup>
 

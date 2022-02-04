@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "CryptoStashStats": {
+    "CryptoStashServer": {
       "commandName": "Project",
       "launchUrl": "swagger",
       "environmentVariables": {

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31410.357
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoStashStats", "CryptoStashStats.csproj", "{6ACB641F-FF15-4654-8DA5-2C51E7EA733E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoStashServer", "CryptoStashServer.csproj", "{6ACB641F-FF15-4654-8DA5-2C51E7EA733E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoStashStats.Tests", "CryptoStashStats.Tests\CryptoStashStats.Tests.csproj", "{3E2615B9-9CD7-4E1A-A8DB-088B8A6C79E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoStashServer.Tests", "CryptoStashServer.Tests\CryptoStashServer.Tests.csproj", "{6994ACE7-5015-40F3-8A94-8F9D807EBFE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{6ACB641F-FF15-4654-8DA5-2C51E7EA733E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ACB641F-FF15-4654-8DA5-2C51E7EA733E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6ACB641F-FF15-4654-8DA5-2C51E7EA733E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E2615B9-9CD7-4E1A-A8DB-088B8A6C79E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E2615B9-9CD7-4E1A-A8DB-088B8A6C79E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E2615B9-9CD7-4E1A-A8DB-088B8A6C79E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E2615B9-9CD7-4E1A-A8DB-088B8A6C79E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6994ACE7-5015-40F3-8A94-8F9D807EBFE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6994ACE7-5015-40F3-8A94-8F9D807EBFE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6994ACE7-5015-40F3-8A94-8F9D807EBFE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6994ACE7-5015-40F3-8A94-8F9D807EBFE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

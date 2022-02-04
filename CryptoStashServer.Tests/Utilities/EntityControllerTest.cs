@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats.Tests.Utilities
+namespace CryptoStashServer.Tests.Utilities
 {
     public abstract class EntityControllerTest
     {

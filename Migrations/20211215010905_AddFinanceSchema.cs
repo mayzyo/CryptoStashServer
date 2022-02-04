@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace CryptoStashStats.Migrations
+namespace CryptoStashServer.Migrations
 {
     public partial class AddFinanceSchema : Migration
     {

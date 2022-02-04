@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
-namespace CryptoStashStats.Utilities
+namespace CryptoStashServer.Utilities
 {
     public interface IPasswordHelper
     {

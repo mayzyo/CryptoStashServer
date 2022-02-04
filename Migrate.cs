@@ -1,4 +1,4 @@
-using CryptoStashStats.Data;
+using CryptoStashServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats
+namespace CryptoStashServer
 {
     public class Migrate
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats.Models
+namespace CryptoStashServer.Models
 {
     public class ExchangeAccountBalance : AccountBalance
     {

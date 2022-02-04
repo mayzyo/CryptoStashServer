@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CryptoStashStats.csproj" />
+    <ProjectReference Include="..\CryptoStashServer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
-using CryptoStashStats.Data;
-using CryptoStashStats.Models;
+using CryptoStashServer.Data;
+using CryptoStashServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats
+namespace CryptoStashServer
 {
     public class SeedData
     {

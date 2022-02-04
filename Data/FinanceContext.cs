@@ -1,12 +1,12 @@
-﻿using CryptoStashStats.Models;
-using CryptoStashStats.Utilities;
+﻿using CryptoStashServer.Models;
+using CryptoStashServer.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CryptoStashStats.Data
+namespace CryptoStashServer.Data
 {
     // Database access in the context of mining. Anything related to mining rig and mining pools should be accessed here.
     public class FinanceContext : BaseContext, ITokenContext
