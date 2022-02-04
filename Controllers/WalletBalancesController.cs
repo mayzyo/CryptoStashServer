@@ -123,6 +123,7 @@ namespace CryptoStashServer.Controllers
             // Get existing account from database.
             walletBalance.Wallet = await context.Wallets
                 .Include(e => e.Blockchain)
+                .ThenInclude(e => e.Tokens)
                 .Include(e => e.Tokens)
                 .FirstOrDefaultAsync(e => e.Id == walletBalance.Wallet.Id);
 
@@ -132,10 +133,10 @@ namespace CryptoStashServer.Controllers
             }
             else if (walletBalance.Token == null)
             {
-                return BadRequest("Associated currency doesn't exist");
+                return BadRequest("Associated token doesn't exist");
             }
 
-            // Get existing currency from database.
+            // Get existing token from database.
             walletBalance.Token = await context.Tokens
                 .FindAsync(walletBalance.Token.Id);
 
@@ -148,7 +149,7 @@ namespace CryptoStashServer.Controllers
                 walletBalance.Wallet.Tokens.Add(walletBalance.Token);
             }
 
-            // Add new currencies to existing currencies in blockchain
+            // Add new tokens to existing tokens in blockchain
             if (walletBalance.Wallet.Blockchain.Tokens != null)
             {
                 walletBalance.Wallet.Blockchain.Tokens = walletBalance.Wallet.Blockchain.Tokens

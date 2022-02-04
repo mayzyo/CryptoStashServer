@@ -142,18 +142,22 @@ namespace CryptoStashServer.Controllers
         [Authorize("write_access")]
         public async Task<IActionResult> DeleteMiningAccount(int id)
         {
-            var miningAccounts = await context.MiningAccounts.FindAsync(id);
-            if (miningAccounts == null)
+            var miningAccount = await context.MiningAccounts.FindAsync(id);
+            if (miningAccount == null)
             {
                 return NotFound();
             }
 
-            if (NotMiningAccountOwner(miningAccounts))
+            if (NotMiningAccountOwner(miningAccount))
             {
                 return Forbid();
             }
 
-            context.MiningAccounts.Remove(miningAccounts);
+            context.MiningAccountBalances.RemoveRange(
+                context.MiningAccountBalances
+                    .Where(e => e.MiningAccount.Id == id)
+                );
+            context.MiningAccounts.Remove(miningAccount);
             await context.SaveChangesAsync();
 
             return NoContent();

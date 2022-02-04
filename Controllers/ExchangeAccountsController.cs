@@ -158,22 +158,25 @@ namespace CryptoStashServer.Controllers
         [Authorize("write_access")]
         public async Task<IActionResult> DeleteExchangeAccount(int id)
         {
-            var exchangeAccounts = await context.ExchangeAccounts
+            var exchangeAccount = await context.ExchangeAccounts
                 .Include(e => e.ExchangeAccountApiKey)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
-            if (exchangeAccounts == null)
+            if (exchangeAccount == null)
             {
                 return NotFound();
             }
 
-            if (NotExchangeAccountOwner(exchangeAccounts))
+            if (NotExchangeAccountOwner(exchangeAccount))
             {
                 return Forbid();
             }
 
-            //context.ExchangeAccounts.Remove(exchangeAccounts);
-            context.Remove(exchangeAccounts);
+            context.ExchangeAccountBalances.RemoveRange(
+                context.ExchangeAccountBalances
+                    .Where(e => e.ExchangeAccount.Id == id)
+                );
+            context.ExchangeAccounts.Remove(exchangeAccount);
             await context.SaveChangesAsync();
 
             return NoContent();

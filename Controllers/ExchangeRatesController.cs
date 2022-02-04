@@ -24,18 +24,19 @@ namespace CryptoStashServer.Controllers
             this.context = context;
         }
 
-        // GET: /CurrencyExchanges/5/ExchangeRates?currencyId=&cursor=&size=
+        // GET: /CurrencyExchanges/5/ExchangeRates?buyerId=&sellerId=&cursor=&size=
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExchangeRate>>> GetExchangeRates(
             int exchangeId,
-            int? currencyId,
+            int? buyerId,
+            int? sellerId,
             int cursor = -1,
             int size = 10
             )
         {
-            var miningAccountBalances = currencyId == null
+            var miningAccountBalances = (buyerId == null || sellerId == null)
                 ? context.ExchangeRates.Include(e => e.BuyerToken)
-                : context.ExchangeRates.Where(e => e.BuyerToken.Id == currencyId);
+                : context.ExchangeRates.Where(e => e.BuyerToken.Id == buyerId && e.SellerToken.Id == sellerId);
 
             return await miningAccountBalances
                 .Where(e => e.CurrencyExchange.Id == exchangeId)

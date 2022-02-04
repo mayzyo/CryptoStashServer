@@ -43,7 +43,9 @@ namespace CryptoStashServer.Controllers
         [Authorize("read_access")]
         public async Task<ActionResult<IEnumerable<Wallet>>> GetWallets()
         {
-            return await Wallets.ToListAsync();
+            return await Wallets
+                .Include(e => e.Blockchain)
+                .ToListAsync();
         }
 
         // GET /Wallets/5
@@ -141,6 +143,11 @@ namespace CryptoStashServer.Controllers
             {
                 return Forbid();
             }
+
+            context.WalletBalances.RemoveRange(
+                context.WalletBalances
+                    .Where(e => e.Wallet.Id == id)
+                );
 
             context.Wallets.Remove(wallet);
             await context.SaveChangesAsync();
